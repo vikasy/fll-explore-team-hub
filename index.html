@@ -108,9 +108,22 @@
 </head>
 <body>
   <header>
-    <h1>FIRST LEGO League Explore Team Hub</h1>
+    <!-- Updated title to reflect the West Valley Elementary team -->
+    <h1>West Valley Elementary FLL Explore Team Hub</h1>
   </header>
   <main>
+    <!-- Welcome section with a kid‑friendly illustration and school link -->
+    <section id="welcome">
+      <!-- The illustration is loaded from the repository root as team_cartoon.png -->
+      <img src="team_cartoon.png" alt="Kids building a robot" style="max-width:100%;height:auto;display:block;margin:0 auto 1rem;" />
+      <p style="text-align:center;font-size:1.2rem;">Welcome to the West Valley Elementary FIRST LEGO League Explore Team!</p>
+      <p style="text-align:center;">
+        Learn more about our school: 
+        <a href="https://westvalley.cusdk8.org" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+          West Valley Elementary School
+        </a>
+      </p>
+    </section>
     <section id="timeline">
       <h2>Season Timeline</h2>
       <div id="timeline-container">Loading timeline…</div>
@@ -178,6 +191,37 @@
       .then((text) => {
         const rows = text.trim().split('\n').map((line) => line.split(','));
         buildTable(rows, 'roster-container');
+        // After building the roster table, convert email cells into mailto links
+        // and provide a convenient "Email all parents" link. This enhances
+        // communication among team parents while keeping the site static.
+        const rosterContainer = document.getElementById('roster-container');
+        const table = rosterContainer.querySelector('table');
+        if (table) {
+          const emails = [];
+          const bodyRows = table.querySelectorAll('tbody tr');
+          bodyRows.forEach((tr) => {
+            // Assume the third column (index 2) holds the parent email
+            const emailCell = tr.cells[2];
+            if (emailCell) {
+              const email = emailCell.textContent.trim();
+              if (email) {
+                emailCell.innerHTML = '<a href="mailto:' + email + '">' + email + '</a>';
+                emails.push(email);
+              }
+            }
+          });
+          if (emails.length > 0) {
+            const p = document.createElement('p');
+            p.style.marginTop = '0.5rem';
+            const link = document.createElement('a');
+            link.href = 'mailto:' + emails.join(',');
+            link.textContent = 'Email all parents';
+            link.style.color = 'var(--primary-color)';
+            link.style.textDecoration = 'underline';
+            p.appendChild(link);
+            rosterContainer.appendChild(p);
+          }
+        }
       })
       .catch(() => {
         document.getElementById('roster-container').textContent =
