@@ -140,6 +140,21 @@
       </div>
       <ul id="task-list"></ul>
     </section>
+
+    <!-- Team media section with simple password protection -->
+    <section id="media">
+      <h2>Team Media (Photos & Videos)</h2>
+      <div id="media-password-container">
+        <p>Please enter the password to view the team media:</p>
+        <input type="password" id="media-password" placeholder="Enter password" />
+        <button id="media-submit">Submit</button>
+      </div>
+      <div id="media-content" style="display: none;">
+        <p>Welcome to our media gallery! Add your photos and videos to the repository and reference them here.</p>
+        <!-- Sample image to demonstrate the gallery. Replace or add more as needed. -->
+        <img src="team_cartoon.png" alt="Team fun" style="max-width: 100%; height: auto;" />
+      </div>
+    </section>
     <section id="calendar">
       <h2>Team Calendar</h2>
       <!-- Replace the line below with your Google Calendar iframe embed code -->
@@ -257,6 +272,27 @@
       }
     });
     loadTasks();
+
+    // Password protection for the media section. This simple client‑side
+    // implementation hides the media content until the correct password is
+    // entered. Replace 'fll2025' with a password of your choosing.
+    (function () {
+      const pwdContainer = document.getElementById('media-password-container');
+      const mediaContent = document.getElementById('media-content');
+      const submitBtn = document.getElementById('media-submit');
+      if (pwdContainer && mediaContent && submitBtn) {
+        submitBtn.addEventListener('click', () => {
+          const pwdInput = document.getElementById('media-password');
+          const password = pwdInput ? pwdInput.value : '';
+          if (password === 'fll2025') {
+            mediaContent.style.display = 'block';
+            pwdContainer.style.display = 'none';
+          } else {
+            alert('Incorrect password. Please try again.');
+          }
+        });
+      }
+    })();
   </script>
 </body>
 </html>
