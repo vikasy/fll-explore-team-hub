@@ -130,6 +130,13 @@ copy those changes here as well or rename that file to index.html.
       <h2>Season Timeline</h2>
       <div id="timeline-container">Loading timeline…</div>
     </section>
+    <!-- Inserted Team Calendar after Timeline -->
+    <section id="calendar">
+      <h2>Team Calendar</h2>
+      <div style="background:#fff;border:1px solid var(--border-color);padding:1rem;text-align:center;">
+        <iframe src="https://calendar.google.com/calendar/embed?src=fll2025.westvalley.cusdk8%40gmail.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+      </div>
+    </section>
     <section id="roster">
       <h2>Team Roster</h2>
       <div id="roster-container">Loading roster…</div>
@@ -161,14 +168,7 @@ copy those changes here as well or rename that file to index.html.
         </a>
       </p>
     </section>
-    <section id="calendar">
-      <h2>Team Calendar</h2>
-      <!-- Replace the line below with your Google Calendar iframe embed code -->
-      <div style="background:#fff;border:1px solid var(--border-color);padding:1rem;text-align:center;">
-        <!-- Embedded team Google Calendar iframe -->
-        <iframe src="https://calendar.google.com/calendar/embed?src=fll2025.westvalley.cusdk8%40gmail.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
-      </div>
-    </section>
+    <!-- Calendar section moved above, removed original -->
   </main>
   <script>
     function buildTable(rows, containerId) {
