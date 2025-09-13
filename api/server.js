@@ -5,10 +5,10 @@ const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const DATA_FILE = __dirname + '/tasks.json';
 
-app.use(cors());
+app.use(cors({ origin: 'https://vikasy.github.io' }));
 app.use(express.json());
 
 // Helper to read tasks from file
