@@ -285,26 +285,49 @@
     // --- Server-based To-Do List Implementation ---
   const API_URL = 'https://fllex2wv.wm.r.appspot.com/api/tasks';
 
+
     async function fetchTasks() {
       try {
         const res = await fetch(API_URL);
-        if (!res.ok) throw new Error('Failed to fetch tasks');
-        return await res.json();
+        if (!res.ok) throw new Error('Failed to fetch tasks: ' + res.status);
+        const data = await res.json();
+        console.log('Fetched tasks:', data);
+        return data;
       } catch (e) {
+        console.error('Error fetching tasks:', e);
+        alert('Error fetching tasks: ' + e.message);
         return [];
       }
     }
 
     async function postTask(task) {
-      await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task })
-      });
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task })
+        });
+        if (!res.ok) throw new Error('Failed to add task: ' + res.status);
+        const data = await res.json();
+        console.log('Task added successfully:', data);
+        return data;
+      } catch (e) {
+        console.error('Error adding task:', e);
+        alert('Error adding task: ' + e.message);
+      }
     }
 
     async function deleteTask(index) {
-      await fetch(`${API_URL}/${index}`, { method: 'DELETE' });
+      try {
+        const res = await fetch(`${API_URL}/${index}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete task: ' + res.status);
+        const data = await res.json();
+        console.log('Task deleted successfully:', data);
+        return data;
+      } catch (e) {
+        console.error('Error deleting task:', e);
+        alert('Error deleting task: ' + e.message);
+      }
     }
 
     async function loadTasks() {
