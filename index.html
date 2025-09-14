@@ -286,6 +286,7 @@
   const API_URL = 'https://fllex2wv.wm.r.appspot.com/api/tasks';
 
 
+
     async function fetchTasks() {
       try {
         const res = await fetch(API_URL);
@@ -317,9 +318,9 @@
       }
     }
 
-    async function deleteTask(index) {
+    async function deleteTask(id) {
       try {
-        const res = await fetch(`${API_URL}/${index}`, { method: 'DELETE' });
+        const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('Failed to delete task: ' + res.status);
         const data = await res.json();
         console.log('Task deleted successfully:', data);
@@ -334,13 +335,13 @@
       const tasks = await fetchTasks();
       const listEl = document.getElementById('task-list');
       listEl.innerHTML = '';
-      tasks.forEach((task, index) => {
+      tasks.forEach((taskObj) => {
         const li = document.createElement('li');
-        li.textContent = task;
+        li.textContent = taskObj.task;
         const removeBtn = document.createElement('button');
         removeBtn.textContent = 'Remove';
         removeBtn.addEventListener('click', async () => {
-          await deleteTask(index);
+          await deleteTask(taskObj.id);
           loadTasks();
         });
         li.appendChild(removeBtn);
