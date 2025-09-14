@@ -1,6 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Firebase App (core) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <!-- (Optional) Firebase Analytics -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+    <script>
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
+        authDomain: "fllex2wv.firebaseapp.com",
+        projectId: "fllex2wv",
+        storageBucket: "fllex2wv.firebasestorage.app",
+        messagingSenderId: "105509048133",
+        appId: "1:105509048133:web:2655ec171befe83d09b82c",
+        measurementId: "G-2YXJTCCFL8"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      if (firebase.analytics) {
+        firebase.analytics();
+      }
+    </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WV FLL Explore Team 2 aka FLLEX2WV Hub</title>
@@ -146,48 +169,62 @@
         </a>
       </p>
     </section>
-    <section id="timeline">
-      <h2>Season Timeline</h2>
-      <div id="timeline-container">Loading timeline…</div>
-    </section>
-    <!-- Inserted Team Calendar after Timeline -->
-    <section id="calendar">
-      <h2>Team Calendar</h2>
-      <div style="background:#fff;border:1px solid var(--border-color);padding:1rem;text-align:center;">
-        <iframe src="https://calendar.google.com/calendar/embed?src=fll2025.westvalley.cusdk8%40gmail.com&ctz=America%2FLos_Angeles" style="border:0; width:100%; height:600px;" frameborder="0" scrolling="no"></iframe>
+    <section id="login-section" style="text-align:center; margin-top:2rem;">
+      <div id="auth-controls" style="margin-bottom:1rem;">
+        <button id="login-btn">Login with Google</button>
+        <button id="logout-btn" style="display:none;">Logout</button>
+        <span id="user-info" style="margin-left:1rem;"></span>
+      </div>
+      <div id="email-auth-form" style="max-width:350px;margin:1rem auto;display:none;">
+        <input type="email" id="email-input" placeholder="Email" style="width:100%;margin-bottom:0.5rem;" />
+        <input type="password" id="password-input" placeholder="Password" style="width:100%;margin-bottom:0.5rem;" />
+        <button id="email-login-btn" style="width:100%;margin-bottom:0.5rem;">Login with Email</button>
+        <button id="email-signup-btn" style="width:100%;">Create Account</button>
+        <div id="email-auth-message" style="color:red;margin-top:0.5rem;"></div>
       </div>
     </section>
-    <section id="roster">
-      <h2>Team Roster</h2>
-      <div id="roster-container">Loading roster…</div>
-    </section>
-    <section id="tasks">
-      <h2>Team To‑Dos</h2>
-      <div>
-        <input type="text" id="task-input" placeholder="Add a new task" />
-        <button id="task-add">Add</button>
-      </div>
-      <ul id="task-list"></ul>
-    </section>
-
-    <!-- Team media section linking to a private Google Drive folder -->
-    <section id="media">
-      <h2>Team Media (Photos & Videos)</h2>
-      <p>
-        Our team photos and videos are stored in a private Google Drive folder.
-        Click the link below to view them. You may need to be signed in to the
-        team Google account or have been granted access to the folder.
-      </p>
-      <p>
-        <a
-          href="https://drive.google.com/drive/folders/1b19vrBw2hnJooXG8DEQJfJXdDpgWjdrF?usp=share_link"
-          target="_blank"
-          style="color: var(--primary-color); text-decoration: underline;"
-        >
-          Team Media Folder
-        </a>
-      </p>
-    </section>
+    <div id="protected-content" style="display:none;">
+      <section id="timeline">
+        <h2>Season Timeline</h2>
+        <div id="timeline-container">Loading timeline…</div>
+      </section>
+      <!-- Inserted Team Calendar after Timeline -->
+      <section id="calendar">
+        <h2>Team Calendar</h2>
+        <div style="background:#fff;border:1px solid var(--border-color);padding:1rem;text-align:center;">
+          <iframe src="https://calendar.google.com/calendar/embed?src=fll2025.westvalley.cusdk8%40gmail.com&ctz=America%2FLos_Angeles" style="border:0; width:100%; height:600px;" frameborder="0" scrolling="no"></iframe>
+        </div>
+      </section>
+      <section id="roster">
+        <h2>Team Roster</h2>
+        <div id="roster-container">Loading roster…</div>
+      </section>
+      <section id="tasks">
+        <h2>Team To‑Dos</h2>
+        <div>
+          <input type="text" id="task-input" placeholder="Add a new task" />
+          <button id="task-add">Add</button>
+        </div>
+        <ul id="task-list"></ul>
+      </section>
+      <!-- Team media section linking to a private Google Drive folder -->
+      <section id="media">
+        <h2>Team Media (Photos & Videos)</h2>
+        <p>
+          Our team photos and videos are stored in a private Google Drive folder.
+          Click the link below to view them. You may need to be signed in to the
+          team Google account or have been granted access to the folder.
+        </p>
+        <p>
+          <a
+            href="https://drive.google.com/drive/folders/1b19vrBw2hnJooXG8DEQJfJXdDpgWjdrF?usp=share_link"
+            target="_blank"
+            style="color: var(--primary-color); text-decoration: underline;"
+          >
+            Team Media Folder
+          </a>
+        </p>
+      </section>
       <!-- Financials subsection -->
       <section id="financials">
         <h2>Financials</h2>
@@ -200,8 +237,7 @@
           <!-- Add more items here as needed -->
         </ul>
       </section>
-    <!-- Calendar section moved above, removed original -->
-  </main>
+    </div>
   <script>
     function buildTable(rows, containerId) {
       if (!rows || rows.length === 0) return;
