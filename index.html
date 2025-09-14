@@ -7,14 +7,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <!-- (Optional) Firebase Analytics -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-    <!-- ReCAPTCHA -->
-    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LfyaMkrAAAAAFkhIoQRjBoczSOuJUfisa54HzNi"></script>
-    <!-- Replace the variables below. -->
-<script>
-  function onSubmit(token) {
-    document.getElementById("demo-form").submit();
-  }
-</script>
+    <!-- ReCAPTCHA (commented out) -->
+    <!-- <script src="https://www.google.com/recaptcha/enterprise.js?render=6LfyaMkrAAAAAFkhIoQRjBoczSOuJUfisa54HzNi"></script> -->
+    <!-- <script>
+      function onSubmit(token) {
+        document.getElementById("demo-form").submit();
+      }
+    </script> -->
     <script>
       // Your web app's Firebase configuration
       const firebaseConfig = {
@@ -189,14 +188,13 @@
     </section>
     <section id="login-section" style="text-align:center; margin-top:2rem;">
       <div id="auth-controls" style="margin-bottom:1rem;">
-      <button class="g-recaptcha"
-    data-sitekey="6LfyaMkrAAAAAFkhIoQRjBoczSOuJUfisa54HzNi"
-    data-callback='onSubmit'
-    data-action='submit'>
-  Submit
-        </button>
+        <!-- <button class="g-recaptcha"
+          data-sitekey="6LfyaMkrAAAAAFkhIoQRjBoczSOuJUfisa54HzNi"
+          data-callback='onSubmit'
+          data-action='submit'>
+          Submit
+        </button> -->
         <button id="login-btn">Login with Google</button>
-        
         <span id="user-info" style="margin-left:1rem;"></span>
       </div>
       <div id="email-auth-form" style="max-width:350px;margin:1rem auto;display:none;">
