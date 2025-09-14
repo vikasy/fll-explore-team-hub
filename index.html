@@ -23,6 +23,7 @@
       if (firebase.analytics) {
         firebase.analytics();
       }
+        console.log('[Firebase] Initialized');
     </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -320,6 +321,81 @@
 
     // --- Server-based To-Do List Implementation ---
   const API_URL = 'https://fllex2wv.wm.r.appspot.com/api/tasks';
+
+      window.addEventListener('DOMContentLoaded', () => {
+        console.log('[App] DOMContentLoaded');
+        // Hide protected content until login
+        const protectedContent = document.getElementById('protected-content');
+        const loginSection = document.getElementById('login-section');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userInfo = document.getElementById('user-info');
+        const emailAuthForm = document.getElementById('email-auth-form');
+        const emailLoginBtn = document.getElementById('email-login-btn');
+        const emailSignupBtn = document.getElementById('email-signup-btn');
+        const emailInput = document.getElementById('email-input');
+        const passwordInput = document.getElementById('password-input');
+        const emailAuthMessage = document.getElementById('email-auth-message');
+
+        if (!window.firebase || !window.firebase.auth) {
+          console.error('[Firebase] SDK not loaded!');
+          return;
+        }
+        const auth = firebase.auth();
+        console.log('[Firebase] Auth initialized');
+
+        loginBtn.onclick = () => {
+          console.log('[Auth] Login button clicked');
+          // Google sign-in
+          const provider = new firebase.auth.GoogleAuthProvider();
+          auth.signInWithPopup(provider).catch(err => {
+            alert('Login failed: ' + err.message);
+            console.error('[Auth] Login failed:', err);
+          });
+        };
+        logoutBtn.onclick = () => {
+          console.log('[Auth] Logout button clicked');
+          auth.signOut();
+        };
+
+        emailLoginBtn.onclick = async () => {
+          emailAuthMessage.textContent = '';
+          try {
+            await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+          } catch (e) {
+            emailAuthMessage.textContent = e.message;
+            console.error('[Auth] Email login failed:', e);
+          }
+        };
+        emailSignupBtn.onclick = async () => {
+          emailAuthMessage.textContent = '';
+          try {
+            await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+            emailAuthMessage.textContent = 'Account created!';
+          } catch (e) {
+            emailAuthMessage.textContent = e.message;
+            console.error('[Auth] Email signup failed:', e);
+          }
+        };
+
+        // Auth state observer
+        auth.onAuthStateChanged(user => {
+          console.log('[Auth] Auth state changed:', user);
+          if (user) {
+            loginSection.style.display = 'none';
+            protectedContent.style.display = '';
+            logoutBtn.style.display = '';
+            userInfo.textContent = 'Logged in as: ' + (user.displayName || user.email);
+            // Enable to-do list
+            if (typeof loadTasks === 'function') loadTasks();
+          } else {
+            loginSection.style.display = '';
+            protectedContent.style.display = 'none';
+            logoutBtn.style.display = 'none';
+            userInfo.textContent = '';
+          }
+        });
+      });
 
 
 
