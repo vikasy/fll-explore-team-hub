@@ -46,31 +46,14 @@ function signInWithGitHub() {
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <!-- (Optional) Firebase Analytics -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-    <!-- ReCAPTCHA (commented out) -->
+    <!-- ReCAPTCHA (commented out)
     <script src="https://www.google.com/recaptcha/enterprise.js?render=6LfyaMkrAAAAAFkhIoQRjBoczSOuJUfisa54HzNi"></script>
     <script>
       function onSubmit(token) {
         document.getElementById("demo-form").submit();
       }
     </script>
-    <script>
-      // Your web app's Firebase configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
-        authDomain: "fllex2wv.firebaseapp.com",
-        projectId: "fllex2wv",
-        storageBucket: "fllex2wv.firebasestorage.app",
-        messagingSenderId: "105509048133",
-        appId: "1:105509048133:web:2655ec171befe83d09b82c",
-        measurementId: "G-2YXJTCCFL8"
-      };
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
-      if (firebase.analytics) {
-        firebase.analytics();
-      }
-        console.log('[Firebase] Initialized');
-    </script>
+    -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WV FLL Explore FLLEX2WV Hub</title>
@@ -183,7 +166,6 @@ function signInWithGitHub() {
       border: none;
       border-radius: 4px;
       cursor: pointer;
-<<<<<<< Updated upstream
     }  
     #login-btn {
       padding: 0.5rem 1rem;
@@ -193,30 +175,6 @@ function signInWithGitHub() {
       border: none;
       border-radius: 4px;
       cursor: pointer;
-=======
-    }
-    #login-btn {
-      width: 50%;
-      padding: 0.5rem 0;
-      font-size: 1rem;
-      background: #ffd580;
-      color: var(--primary-color);
-      border: 2px solid var(--primary-color);
-      border-radius: 6px;
-      font-weight: bold;
-      margin: 1rem 0.5rem 1rem 0;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: background 0.2s, color 0.2s;
-      height: 40px;
-      min-width: 100px;
-      max-width: 160px;
-      display: inline-block;
-    }
-    #login-btn:hover {
-      background: var(--primary-color);
-      color: #fff;
->>>>>>> Stashed changes
     }
   
     /* Responsive adjustments for small screens */
@@ -300,19 +258,11 @@ function signInWithGitHub() {
         <span id="user-info" style="margin-left:1rem;"></span>
       </div>
       <div id="email-auth-form" style="max-width:350px;margin:1rem auto;">
-<<<<<<< Updated upstream
         <input type="email" id="email-input" placeholder="Email" style="width:100%;margin-bottom:0.5rem;" />
         <input type="password" id="password-input" placeholder="Password" style="width:100%;margin-bottom:0.5rem;" />
         <button id="email-login-btn" style="width:100%;margin-bottom:0.5rem;">Login with Email</button>
         <!-- <button id="email-signup-btn" style="width:100%;">Create Account</button> -->
         <div id="email-auth-message" style="color:red;margin-top:0.5rem;"></div>
-=======
-  <input type="email" id="email-input" placeholder="Email" style="width:50%;margin-bottom:0.5rem;" />
-  <input type="password" id="password-input" placeholder="Password" style="width:50%;margin-bottom:0.5rem;" />
-  <button id="email-login-btn" style="width:50%;margin-bottom:0.5rem;background:#4caf50;color:#fff;font-weight:bold;border:none;border-radius:6px;">Login with Email</button>
-  <button id="email-signup-btn" style="width:50%;background:#4caf50;color:#fff;font-weight:bold;border:none;border-radius:6px;">Create Account</button>
-  <div id="email-auth-message" style="color:red;margin-top:0.5rem;"></div>
->>>>>>> Stashed changes
       </div>
     </section>
     <!-- Protected Section -->
