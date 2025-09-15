@@ -34,7 +34,7 @@
     </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WV FLL Explore Team 2 aka FLLEX2WV Hub</title>
+  <title>WV FLL Explore FLLEX2WV Hub</title>
   <!--
     This simple static portal provides a central hub for a FIRST LEGO League Explore team.
     It loads a season timeline and a roster from CSV files in the same directory and
@@ -153,7 +153,24 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-    }  
+    }
+  
+    /* Responsive adjustments for small screens */
+    @media (max-width: 600px) {
+      #task-input {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+      #task-add {
+        width: 100%;
+        margin-left: 0;
+      }
+      iframe {
+        height: 400px;
+      }
+    }
+</style>
+<style>
     #email-auth-btn {
       padding: 0.5rem 1rem;
       margin-left: 0.5rem;
@@ -176,21 +193,6 @@
       max-width: 400px;
       border: 1px solid var(--border-color);
       border-radius: 4px;
-    }
-  
-    /* Responsive adjustments for small screens */
-    @media (max-width: 600px) {
-      #task-input {
-        width: 100%;
-        margin-bottom: 0.5rem;
-      }
-      #task-add {
-        width: 100%;
-        margin-left: 0;
-      }
-      iframe {
-        height: 400px;
-      }
     }
 </style>
 </head>
