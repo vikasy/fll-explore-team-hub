@@ -21,32 +21,13 @@
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
 </script>
-<script>import { getAuth, signInWithPopup, GithubAuthProvider } from "firebase/auth";
-
-const auth = getAuth();
-const provider = new GithubAuthProvider();
-
-// Attach this function to a button click event
-function signInWithGitHub() {
-  signInWithPopup(auth, provider)
-    .then((result) => {
-      // The user is signed in.
-      const user = result.user;
-      console.log("Signed in with GitHub:", user);
-    })
-    .catch((error) => {
-      // Handle Errors here.
-      console.error("Sign-in failed:", error.message);
-    });
-}
-</script>
     <!-- Firebase App (core) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <!-- Firebase Auth -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <!-- (Optional) Firebase Analytics -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-    <!-- ReCAPTCHA (commented out) -->
+    <!-- ReCAPTCHA -->
     <script src="https://www.google.com/recaptcha/enterprise.js?render=6LfyaMkrAAAAAFkhIoQRjBoczSOuJUfisa54HzNi"></script>
     <script>
       function onSubmit(token) {
@@ -233,15 +214,6 @@ function signInWithGitHub() {
       border: 1px solid var(--border-color);
       border-radius: 4px;
     }
-    #github {
-      padding: 0.5rem 1rem;
-      margin-left: 0.5rem;
-      background: var(--primary-color);
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
 </style>
 </head>
 <body>
@@ -271,7 +243,6 @@ function signInWithGitHub() {
     <section id="login-section" style="text-align:center; margin-top:2rem;">
       <div id="auth-controls" style="margin-bottom:1rem;">
         <button id="login-btn">Login with Google</button>
-        <button id="github" onclick="signInWithGitHub()">Sign in with GitHub</button>
         <span id="user-info" style="margin-left:1rem;"></span>
       </div>
       <div id="email-auth-form" style="max-width:350px;margin:1rem auto;">
