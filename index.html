@@ -10,12 +10,12 @@
 
   // Your web app's Firebase configuration
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
+    authDomain: "fllex2wv.firebaseapp.com",
+    projectId: "fllex2wv",
+    storageBucket: "fllex2wv.appspot.com",
+    messagingSenderId: "fllex2wv.appspot.com",
+    appId: "1:105509048133:web:2655ec171befe83d09b82c"
   };
 
   // Initialize Firebase
@@ -233,6 +233,15 @@ function signInWithGitHub() {
       border: 1px solid var(--border-color);
       border-radius: 4px;
     }
+    #github {
+      padding: 0.5rem 1rem;
+      margin-left: 0.5rem;
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
 </style>
 </head>
 <body>
@@ -261,13 +270,8 @@ function signInWithGitHub() {
     </section>
     <section id="login-section" style="text-align:center; margin-top:2rem;">
       <div id="auth-controls" style="margin-bottom:1rem;">
-        <!-- <button class="g-recaptcha"
-          data-sitekey="6LfyaMkrAAAAAFkhIoQRjBoczSOuJUfisa54HzNi"
-          data-callback='onSubmit'
-          data-action='submit'>
-          Submit
-        </button> -->
         <button id="login-btn">Login with Google</button>
+        <button id="github" onclick="signInWithGitHub()">Sign in with GitHub</button>
         <span id="user-info" style="margin-left:1rem;"></span>
       </div>
       <div id="email-auth-form" style="max-width:350px;margin:1rem auto;">
