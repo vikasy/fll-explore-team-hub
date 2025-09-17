@@ -1,32 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Firebase SDK (latest version) -->
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
-    authDomain: "fllex2wv.firebaseapp.com",
-    projectId: "fllex2wv",
-    storageBucket: "fllex2wv.appspot.com",
-    messagingSenderId: "fllex2wv.appspot.com",
-    appId: "1:105509048133:web:2655ec171befe83d09b82c"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
-    <!-- Firebase App (core) -->
+    <!-- Firebase SDKs: MUST be first in <head> -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <!-- Firebase Auth -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <!-- (Optional) Firebase Analytics -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+    <script>
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
+        authDomain: "fllex2wv.firebaseapp.com",
+        projectId: "fllex2wv",
+        storageBucket: "fllex2wv.appspot.com",
+        messagingSenderId: "105509048133",
+        appId: "1:105509048133:web:2655ec171befe83d09b82c"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      if (firebase.analytics) {
+        firebase.analytics();
+      }
+      console.log('[Firebase] Initialized');
+    </script>
     <!-- ReCAPTCHA (commented out)
     <script src="https://www.google.com/recaptcha/enterprise.js?render=6LfyaMkrAAAAAFkhIoQRjBoczSOuJUfisa54HzNi"></script>
     <script>
@@ -174,372 +169,377 @@
     }
 </style>
 <style>
-    #email-login-btn {
-      padding: 0.5rem 1rem;
-      margin-left: 0.5rem;
-      background: var(--primary-color);
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    #email-input {
-      padding: 0.5rem;
-      width: 70%;
-      max-width: 400px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-    }
-    #password-input {
-      padding: 0.5rem;
-      width: 70%;
-      max-width: 400px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-    }
+  #email-login-btn {
+    padding: 0.5rem 1rem;
+    margin-left: 0.5rem;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  #email-input {
+    padding: 0.5rem;
+    width: 70%;
+    max-width: 400px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+  }
+  #password-input {
+    padding: 0.5rem;
+    width: 70%;
+    max-width: 400px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
 </style>
 </head>
+
+
 <body>
-  <header>
-    <h1>West Valley Elementary FLL Explore Team 2 [FLLEX2WV] Hub</h1>
-  </header>
-  <main>
-    <section id="welcome">
-      <!-- The illustration is loaded from the repository root as team_cartoon.png -->
-      <img src="IMG_5632.png" alt="Kids building a robot" style="max-width:100%;height:auto;display:block;margin:0 auto 1rem;" />
-      <p style="text-align:center;font-size:1.2rem;">West Valley Elementary FIRST LEGO League </p>
-      <p style="text-align:center;font-size:1.2rem;"> Explore Team #2 aka FLLEX2WV </p>
-      <p style="text-align:center;">
-        Our school: 
-        <a href="https://westvalley.cusdk8.org" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
-          West Valley Elementary School
-        </a>
-      </p>
-      <!-- Easy link to access this portal -->
-      <p style="text-align:center;">
-        Simple URL:
-        <a href="https://westvalley.short.gy/fllexplore" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
-          westvalley.short.gy/fllexplore
-        </a>
-      </p>
-    </section>
-    <section id="login-section" style="text-align:center; margin-top:2rem;">
-      <div id="auth-controls" style="margin-bottom:1rem;">
-        <button id="login-btn">Login with Google</button>
-        <span id="user-info" style="margin-left:1rem;"></span>
-      </div>
-      <div id="email-auth-form" style="max-width:350px;margin:1rem auto;">
-        <input type="email" id="email-input" placeholder="Email" style="width:100%;margin-bottom:0.5rem;" />
-        <input type="password" id="password-input" placeholder="Password" style="width:100%;margin-bottom:0.5rem;" />
-        <button id="email-login-btn" style="width:100%;margin-bottom:0.5rem;">Login with Email</button>
-        <!-- <button id="email-signup-btn" style="width:100%;">Create Account</button> -->
-        <div id="email-auth-message" style="color:red;margin-top:0.5rem;"></div>
-      </div>
-    </section>
-    <!-- Protected Section -->
-    <div id="protected-content" style="display:none;">
-      <section id="timeline">
-        <h2>Season Timeline</h2>
-        <div id="timeline-container">Loading timeline…</div>
-      </section>
-      <!-- Inserted Team Calendar after Timeline -->
-      <section id="calendar">
-        <h2>Team Calendar</h2>
-        <div style="background:#fff;border:1px solid var(--border-color);padding:1rem;text-align:center;">
-          <iframe src="https://calendar.google.com/calendar/embed?src=fll2025.westvalley.cusdk8%40gmail.com&ctz=America%2FLos_Angeles" style="border:0; width:100%; height:600px;" frameborder="0" scrolling="no"></iframe>
-        </div>
-      </section>
-      <section id="roster">
-        <h2>Team Roster</h2>
-        <div id="roster-container">Loading roster…</div>
-      </section>
-      <section id="tasks">
-        <h2>Team To‑Dos</h2>
-        <div>
-          <input type="text" id="task-input" placeholder="Add a new task" />
-          <button id="task-add">Add</button>
-        </div>
-        <ul id="task-list"></ul>
-      </section>
-      <!-- Team media section linking to a private Google Drive folder -->
-      <section id="media">
-        <h2>Team Media (Photos & Videos)</h2>
-        <p>
-          Our team photos and videos are stored in a private Google Drive folder.
-          Click the link below to view them. You may need to be signed in to the
-          team Google account or have been granted access to the folder.
-        </p>
-        <p>
-          <a
-            href="https://drive.google.com/drive/folders/1b19vrBw2hnJooXG8DEQJfJXdDpgWjdrF?usp=share_link"
-            target="_blank"
-            style="color: var(--primary-color); text-decoration: underline;"
-          >
-            Team Media Folder
-          </a>
-        </p>
-      </section>
-      <!-- Financials subsection -->
-      <section id="financials">
-        <h2>Financials</h2>
-        <ul>
-          <li>
-            <a href="money_matters/FLLEX2WV_Registration_Fee.jpeg" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
-              Registration Fee Receipt
-            </a>
-          </li>
-          <!-- Add more items here as needed -->
-        </ul>
-      </section>
-      <section id="log-out">
-          <button id="logout-btn" style="display:none;">Logout</button>
-      </section>
+<header>
+<h1>West Valley Elementary FLL Explore Team 2 [FLLEX2WV] Hub</h1>
+</header>
+
+<main>
+<section id="welcome">
+  <!-- The illustration is loaded from the repository root as team_cartoon.png -->
+  <img src="IMG_5632.png" alt="Kids building a robot" style="max-width:100%;height:auto;display:block;margin:0 auto 1rem;" />
+  <p style="text-align:center;font-size:1.2rem;">West Valley Elementary FIRST LEGO League </p>
+  <p style="text-align:center;font-size:1.2rem;"> Explore Team #2 aka FLLEX2WV </p>
+  <p style="text-align:center;">
+    Our school: 
+    <a href="https://westvalley.cusdk8.org" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+      West Valley Elementary School
+    </a>
+  </p>
+  <!-- Easy link to access this portal -->
+  <p style="text-align:center;">
+    Simple URL:
+    <a href="https://westvalley.short.gy/fllexplore" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+      westvalley.short.gy/fllexplore
+    </a>
+  </p>
+</section>
+<section id="login-section" style="text-align:center; margin-top:2rem;">
+  <div id="auth-controls" style="margin-bottom:1rem;">
+    <button id="login-btn">Login with Google</button>
+    <span id="user-info" style="margin-left:1rem;"></span>
+  </div>
+  <div id="email-auth-form" style="max-width:350px;margin:1rem auto;">
+    <input type="email" id="email-input" placeholder="Email" style="width:100%;margin-bottom:0.5rem;" />
+    <input type="password" id="password-input" placeholder="Password" style="width:100%;margin-bottom:0.5rem;" />
+    <button id="email-login-btn" style="width:100%;margin-bottom:0.5rem;">Login with Email</button>
+    <!-- <button id="email-signup-btn" style="width:100%;">Create Account</button> -->
+    <div id="email-auth-message" style="color:red;margin-top:0.5rem;"></div>
+  </div>
+</section>
+<!-- Protected Section -->
+<div id="protected-content" style="display:none;">
+  <section id="timeline">
+    <h2>Season Timeline</h2>
+    <div id="timeline-container">Loading timeline…</div>
+  </section>
+  <!-- Inserted Team Calendar after Timeline -->
+  <section id="calendar">
+    <h2>Team Calendar</h2>
+    <div style="background:#fff;border:1px solid var(--border-color);padding:1rem;text-align:center;">
+      <iframe src="https://calendar.google.com/calendar/embed?src=fll2025.westvalley.cusdk8%40gmail.com&ctz=America%2FLos_Angeles" style="border:0; width:100%; height:600px;" frameborder="0" scrolling="no"></iframe>
     </div>
-  <script>
-    function buildTable(rows, containerId) {
-      if (!rows || rows.length === 0) return;
-      const container = document.getElementById(containerId);
-      const table = document.createElement('table');
-      const thead = document.createElement('thead');
-      const headerRow = document.createElement('tr');
-      rows[0].forEach((cell) => {
-        const th = document.createElement('th');
-        th.textContent = cell;
-        headerRow.appendChild(th);
+  </section>
+  <section id="roster">
+    <h2>Team Roster</h2>
+    <div id="roster-container">Loading roster…</div>
+  </section>
+  <section id="tasks">
+    <h2>Team To‑Dos</h2>
+    <div>
+      <input type="text" id="task-input" placeholder="Add a new task" />
+      <button id="task-add">Add</button>
+    </div>
+    <ul id="task-list"></ul>
+  </section>
+  <!-- Team media section linking to a private Google Drive folder -->
+  <section id="media">
+    <h2>Team Media (Photos & Videos)</h2>
+    <p>
+      Our team photos and videos are stored in a private Google Drive folder.
+      Click the link below to view them. You may need to be signed in to the
+      team Google account or have been granted access to the folder.
+    </p>
+    <p>
+      <a
+        href="https://drive.google.com/drive/folders/1b19vrBw2hnJooXG8DEQJfJXdDpgWjdrF?usp=share_link"
+        target="_blank"
+        style="color: var(--primary-color); text-decoration: underline;"
+      >
+        Team Media Folder
+      </a>
+    </p>
+  </section>
+  <!-- Financials subsection -->
+  <section id="financials">
+    <h2>Financials</h2>
+    <ul>
+      <li>
+        <a href="money_matters/FLLEX2WV_Registration_Fee.jpeg" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+          Registration Fee Receipt
+        </a>
+      </li>
+      <!-- Add more items here as needed -->
+    </ul>
+  </section>
+  <section id="log-out">
+      <button id="logout-btn" style="display:none;">Logout</button>
+  </section>
+</div>
+</main>
+
+<script>
+  // --- BEGIN: Your main app code ---
+  function buildTable(rows, containerId) {
+    if (!rows || rows.length === 0) return;
+    const container = document.getElementById(containerId);
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    rows[0].forEach((cell) => {
+      const th = document.createElement('th');
+      th.textContent = cell;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    for (let i = 1; i < rows.length; i++) {
+      const tr = document.createElement('tr');
+      rows[i].forEach((cell) => {
+        const td = document.createElement('td');
+        td.textContent = cell;
+        tr.appendChild(td);
       });
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-      const tbody = document.createElement('tbody');
-      for (let i = 1; i < rows.length; i++) {
-        const tr = document.createElement('tr');
-        rows[i].forEach((cell) => {
-          const td = document.createElement('td');
-          td.textContent = cell;
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      }
-      table.appendChild(tbody);
-      container.innerHTML = '';
-      container.appendChild(table);
+      tbody.appendChild(tr);
     }
-    fetch('fll_explore_timeline_2025_26.csv')
-      .then((response) => response.text())
-      .then((text) => {
-        const rows = text.trim().split('\n').map((line) => line.split(','));
-        buildTable(rows, 'timeline-container');
-      })
-      .catch(() => {
-        document.getElementById('timeline-container').textContent =
-          'Could not load timeline.';
-      });
+    table.appendChild(tbody);
+    container.innerHTML = '';
+    container.appendChild(table);
+  }
+  fetch('fll_explore_timeline_2025_26.csv')
+    .then((response) => response.text())
+    .then((text) => {
+      const rows = text.trim().split('\n').map((line) => line.split(','));
+      buildTable(rows, 'timeline-container');
+    })
+    .catch(() => {
+      document.getElementById('timeline-container').textContent =
+        'Could not load timeline.';
+    });
   fetch('fll_parents_list.csv')
-      .then((response) => response.text())
-      .then((text) => {
-        const rows = text.trim().split('\n').map((line) => line.split(','));
-        buildTable(rows, 'roster-container');
-        // After building the roster table, convert email cells into mailto links
-        // and provide a convenient "Email all parents" link. This enhances
-        // communication among team parents while keeping the site static.
-        const rosterContainer = document.getElementById('roster-container');
-        const table = rosterContainer.querySelector('table');
-        if (table) {
-          const emails = [];
-          const bodyRows = table.querySelectorAll('tbody tr');
-          bodyRows.forEach((tr) => {
-            // Assume the third column (index 2) holds the parent email
-            const emailCell = tr.cells[2];
-            if (emailCell) {
-              const email = emailCell.textContent.trim();
-              if (email) {
-                emailCell.innerHTML = '<a href="mailto:' + email + '">' + email + '</a>';
-                emails.push(email);
-              }
+    .then((response) => response.text())
+    .then((text) => {
+      const rows = text.trim().split('\n').map((line) => line.split(','));
+      buildTable(rows, 'roster-container');
+      // After building the roster table, convert email cells into mailto links
+      // and provide a convenient "Email all parents" link. This enhances
+      // communication among team parents while keeping the site static.
+      const rosterContainer = document.getElementById('roster-container');
+      const table = rosterContainer.querySelector('table');
+      if (table) {
+        const emails = [];
+        const bodyRows = table.querySelectorAll('tbody tr');
+        bodyRows.forEach((tr) => {
+          // Assume the third column (index 2) holds the parent email
+          const emailCell = tr.cells[2];
+          if (emailCell) {
+            const email = emailCell.textContent.trim();
+            if (email) {
+              emailCell.innerHTML = '<a href="mailto:' + email + '">' + email + '</a>';
+              emails.push(email);
             }
-          });
-          if (emails.length > 0) {
-            const p = document.createElement('p');
-            p.style.marginTop = '0.5rem';
-            const link = document.createElement('a');
-            link.href = 'mailto:' + emails.join(',');
-            link.textContent = 'Email all parents';
-            link.style.color = 'var(--primary-color)';
-            link.style.textDecoration = 'underline';
-            p.appendChild(link);
-            rosterContainer.appendChild(p);
-          }
-        }
-      })
-      .catch(() => {
-        document.getElementById('roster-container').textContent =
-          'Could not load roster.';
-      });
-
-    // --- Server-based To-Do List Implementation ---
-  const API_URL = 'https://fllex2wv.wm.r.appspot.com/api/tasks';
-
-      window.addEventListener('DOMContentLoaded', () => {
-        console.log('[App] DOMContentLoaded');
-        // Hide protected content until login
-        const protectedContent = document.getElementById('protected-content');
-        const loginSection = document.getElementById('login-section');
-        const loginBtn = document.getElementById('login-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const userInfo = document.getElementById('user-info');
-        const emailAuthForm = document.getElementById('email-auth-form');
-        const emailLoginBtn = document.getElementById('email-login-btn');
-        const emailSignupBtn = document.getElementById('email-signup-btn');
-        const emailInput = document.getElementById('email-input');
-        const passwordInput = document.getElementById('password-input');
-        const emailAuthMessage = document.getElementById('email-auth-message');
-
-        if (!window.firebase || !window.firebase.auth) {
-          console.error('[Firebase] SDK not loaded!');
-          return;
-        }
-        const auth = firebase.auth();
-        console.log('[Firebase] Auth initialized');
-
-        loginBtn.onclick = () => {
-          console.log('[Auth] Login button clicked');
-          // Google sign-in
-          const provider = new firebase.auth.GoogleAuthProvider();
-          auth.signInWithPopup(provider).catch(err => {
-            alert('Login failed: ' + err.message);
-            console.error('[Auth] Login failed:', err);
-          });
-        };
-        logoutBtn.onclick = () => {
-          console.log('[Auth] Logout button clicked');
-          auth.signOut();
-        };
-
-        emailLoginBtn.onclick = async () => {
-          emailAuthMessage.textContent = '';
-          try {
-            await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
-          } catch (e) {
-            emailAuthMessage.textContent = e.message;
-            console.error('[Auth] Email login failed:', e);
-          }
-        };
-        emailSignupBtn.onclick = async () => {
-          emailAuthMessage.textContent = '';
-          try {
-            await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
-            emailAuthMessage.textContent = 'Account created!';
-          } catch (e) {
-            emailAuthMessage.textContent = e.message;
-            console.error('[Auth] Email signup failed:', e);
-          }
-        };
-
-        // Auth state observer
-        auth.onAuthStateChanged(user => {
-          console.log('[Auth] Auth state changed:', user);
-          if (user) {
-            loginSection.style.display = 'none';
-            protectedContent.style.display = '';
-            logoutBtn.style.display = '';
-            userInfo.textContent = 'Logged in as: ' + (user.displayName || user.email);
-            // Enable to-do list
-            if (typeof loadTasks === 'function') loadTasks();
-          } else {
-            loginSection.style.display = '';
-            protectedContent.style.display = 'none';
-            logoutBtn.style.display = 'none';
-            userInfo.textContent = '';
           }
         });
-      });
-
-
-
-    async function fetchTasks() {
-      try {
-        // Add cache-busting query param to avoid 304 caching issues
-        const res = await fetch(API_URL + '?_=' + Date.now());
-        if (!res.ok) throw new Error('Failed to fetch tasks: ' + res.status);
-        const data = await res.json();
-        console.log('Fetched tasks:', data);
-        // Ensure data is an array of objects with id and task
-        if (!Array.isArray(data)) return [];
-        return data.filter(obj => obj && typeof obj.task === 'string' && obj.id);
-      } catch (e) {
-        console.error('Error fetching tasks:', e);
-        alert('Error fetching tasks: ' + e.message);
-        return [];
-      }
-    }
-
-    async function postTask(task) {
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ task })
-        });
-        if (!res.ok) throw new Error('Failed to add task: ' + res.status);
-        const data = await res.json();
-        console.log('Task added successfully:', data);
-        return data;
-      } catch (e) {
-        console.error('Error adding task:', e);
-        alert('Error adding task: ' + e.message);
-      }
-    }
-
-    async function deleteTask(id) {
-      try {
-        const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('Failed to delete task: ' + res.status);
-        const data = await res.json();
-        console.log('Task deleted successfully:', data);
-        return data;
-      } catch (e) {
-        console.error('Error deleting task:', e);
-        alert('Error deleting task: ' + e.message);
-      }
-    }
-
-    async function loadTasks() {
-      const tasks = await fetchTasks();
-      const listEl = document.getElementById('task-list');
-      listEl.innerHTML = '';
-      tasks.forEach((taskObj) => {
-        // Defensive: fallback if taskObj is missing fields
-        const taskText = (taskObj && typeof taskObj.task === 'string') ? taskObj.task : '[No task]';
-        const taskId = (taskObj && taskObj.id) ? taskObj.id : null;
-        const li = document.createElement('li');
-        li.textContent = taskText;
-        if (taskId) {
-          const removeBtn = document.createElement('button');
-          removeBtn.textContent = 'Remove';
-          removeBtn.addEventListener('click', async () => {
-            await deleteTask(taskId);
-            loadTasks();
-          });
-          li.appendChild(removeBtn);
+        if (emails.length > 0) {
+          const p = document.createElement('p');
+          p.style.marginTop = '0.5rem';
+          const link = document.createElement('a');
+          link.href = 'mailto:' + emails.join(',');
+          link.textContent = 'Email all parents';
+          link.style.color = 'var(--primary-color)';
+          link.style.textDecoration = 'underline';
+          p.appendChild(link);
+          rosterContainer.appendChild(p);
         }
-        listEl.appendChild(li);
-      });
-    }
-
-    document.getElementById('task-add').addEventListener('click', async () => {
-      const inputEl = document.getElementById('task-input');
-      const text = inputEl.value.trim();
-      if (text) {
-        await postTask(text);
-        inputEl.value = '';
-        loadTasks();
       }
+    })
+    .catch(() => {
+      document.getElementById('roster-container').textContent =
+        'Could not load roster.';
     });
 
-    // Initialise the task list when the page loads.
-    loadTasks();
+  // --- Server-based To-Do List Implementation ---
+  const API_URL = 'https://fllex2wv.wm.r.appspot.com/api/tasks';
 
-    // The media section now links to a private Google Drive folder rather than using
-    // client-side password protection. No additional script is required here.
-  </script>
+  window.addEventListener('DOMContentLoaded', () => {
+  console.log('[App] DOMContentLoaded');
+  // Hide protected content until login
+  const protectedContent = document.getElementById('protected-content');
+  const loginSection = document.getElementById('login-section');
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const userInfo = document.getElementById('user-info');
+  const emailAuthForm = document.getElementById('email-auth-form');
+  const emailLoginBtn = document.getElementById('email-login-btn');
+  const emailSignupBtn = document.getElementById('email-signup-btn');
+  const emailInput = document.getElementById('email-input');
+  const passwordInput = document.getElementById('password-input');
+  const emailAuthMessage = document.getElementById('email-auth-message');
+
+  if (!window.firebase || !window.firebase.auth) {
+    console.error('[Firebase] SDK not loaded!');
+    return;
+  }
+  const auth = firebase.auth();
+  console.log('[Firebase] Auth initialized');
+
+  loginBtn.onclick = () => {
+    console.log('[Auth] Login button clicked');
+    // Google sign-in
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(err => {
+      alert('Login failed: ' + err.message);
+      console.error('[Auth] Login failed:', err);
+    });
+  };
+  logoutBtn.onclick = () => {
+    console.log('[Auth] Logout button clicked');
+    auth.signOut();
+  };
+
+  emailLoginBtn.onclick = async () => {
+    emailAuthMessage.textContent = '';
+    try {
+      await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+    } catch (e) {
+      emailAuthMessage.textContent = e.message;
+      console.error('[Auth] Email login failed:', e);
+    }
+  };
+  emailSignupBtn.onclick = async () => {
+    emailAuthMessage.textContent = '';
+    try {
+      await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+      emailAuthMessage.textContent = 'Account created!';
+    } catch (e) {
+      emailAuthMessage.textContent = e.message;
+      console.error('[Auth] Email signup failed:', e);
+    }
+  };
+
+  // Auth state observer
+  auth.onAuthStateChanged(user => {
+    console.log('[Auth] Auth state changed:', user);
+    if (user) {
+      loginSection.style.display = 'none';
+      protectedContent.style.display = '';
+      logoutBtn.style.display = '';
+      userInfo.textContent = 'Logged in as: ' + (user.displayName || user.email);
+      // Enable to-do list
+      if (typeof loadTasks === 'function') loadTasks();
+    } else {
+      loginSection.style.display = '';
+      protectedContent.style.display = 'none';
+      logoutBtn.style.display = 'none';
+      userInfo.textContent = '';
+    }
+  });
+
+
+  async function fetchTasks() {
+    try {
+      // Add cache-busting query param to avoid 304 caching issues
+      const res = await fetch(API_URL + '?_=' + Date.now());
+      if (!res.ok) throw new Error('Failed to fetch tasks: ' + res.status);
+      const data = await res.json();
+      console.log('Fetched tasks:', data);
+      // Ensure data is an array of objects with id and task
+      if (!Array.isArray(data)) return [];
+      return data.filter(obj => obj && typeof obj.task === 'string' && obj.id);
+    } catch (e) {
+      console.error('Error fetching tasks:', e);
+      alert('Error fetching tasks: ' + e.message);
+      return [];
+    }
+  }
+
+  async function postTask(task) {
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task })
+      });
+      if (!res.ok) throw new Error('Failed to add task: ' + res.status);
+      const data = await res.json();
+      console.log('Task added successfully:', data);
+      return data;
+    } catch (e) {
+      console.error('Error adding task:', e);
+      alert('Error adding task: ' + e.message);
+    }
+  }
+
+  async function deleteTask(id) {
+    try {
+      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete task: ' + res.status);
+      const data = await res.json();
+      console.log('Task deleted successfully:', data);
+      return data;
+    } catch (e) {
+      console.error('Error deleting task:', e);
+      alert('Error deleting task: ' + e.message);
+    }
+  }
+
+  async function loadTasks() {
+    const tasks = await fetchTasks();
+    const listEl = document.getElementById('task-list');
+    listEl.innerHTML = '';
+    tasks.forEach((taskObj) => {
+      // Defensive: fallback if taskObj is missing fields
+      const taskText = (taskObj && typeof taskObj.task === 'string') ? taskObj.task : '[No task]';
+      const taskId = (taskObj && taskObj.id) ? taskObj.id : null;
+      const li = document.createElement('li');
+      li.textContent = taskText;
+      if (taskId) {
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remove';
+        removeBtn.addEventListener('click', async () => {
+          await deleteTask(taskId);
+          loadTasks();
+        });
+        li.appendChild(removeBtn);
+      }
+      listEl.appendChild(li);
+    });
+  }
+
+  document.getElementById('task-add').addEventListener('click', async () => {
+    const inputEl = document.getElementById('task-input');
+    const text = inputEl.value.trim();
+    if (text) {
+      await postTask(text);
+      inputEl.value = '';
+      loadTasks();
+    }
+  });
+
+  // Initialise the task list when the page loads.
+  loadTasks();
+
+  // The media section now links to a private Google Drive folder rather than using
+  // client-side password protection. No additional script is required here.
+</script>
+
 </body>
 </html>
