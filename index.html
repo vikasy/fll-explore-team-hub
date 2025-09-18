@@ -7,6 +7,15 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
   <script>
+    // Allowlist of parent emails (from fll_parents_list.csv)
+    const allowUser = [
+      'samirbaid@gmail.com',
+      'dedhia.krina@gmail.com',
+      'juididolkr@gmail.com',
+      'namitachitre85@gmail.com',
+      'vikasy@gmail.com'
+    ];
+
     // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
@@ -443,17 +452,53 @@
         }
       };
 
-      // Auth state observer
+      // Auth state observer with allowUser check
+      const errorDiv = document.createElement('div');
+      errorDiv.id = 'access-denied';
+      errorDiv.style.display = 'none';
+      errorDiv.style.textAlign = 'center';
+      errorDiv.style.margin = '2rem auto';
+      errorDiv.innerHTML = `
+        <div style="color:#b00;font-size:1.2rem;font-weight:bold;margin-bottom:1rem;">Access Denied</div>
+        <div style="margin-bottom:1rem;">Your email is not authorized to access this site.</div>
+        <button id="contact-admin-btn" style="padding:0.5rem 1.5rem;background:#0052a3;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:1rem;">Contact Admin</button>
+        <div id="admin-email" style="display:none;margin-top:1rem;">Admin email: <span style="font-weight:bold;">vikasy@gmail.com</span></div>
+        <div id="admin-confirm" style="display:none;margin-top:1rem;color:#0052a3;font-weight:bold;">Admin has been contacted. Bye.</div>
+      `;
+      document.body.appendChild(errorDiv);
+
+      document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'contact-admin-btn') {
+          document.getElementById('admin-email').style.display = '';
+          setTimeout(() => {
+            document.getElementById('admin-email').style.display = 'none';
+            document.getElementById('admin-confirm').style.display = '';
+          }, 3000);
+        }
+      });
+
       auth.onAuthStateChanged(user => {
         console.log('[Auth] Auth state changed:', user);
         if (user) {
-          loginSection.style.display = 'none';
-          protectedContent.style.display = '';
-          logoutBtn.style.display = '';
-          userInfo.textContent = 'Logged in as: ' + (user.displayName || user.email);
-          // Enable to-do list
-          if (typeof loadTasks === 'function') loadTasks();
+          const email = (user.email || '').toLowerCase();
+          if (!allowUser.includes(email)) {
+            loginSection.style.display = '';
+            protectedContent.style.display = 'none';
+            logoutBtn.style.display = 'none';
+            userInfo.textContent = '';
+            errorDiv.style.display = '';
+            return;
+          } else {
+            errorDiv.style.display = 'none';
+            loginSection.style.display = 'none';
+            protectedContent.style.display = '';
+            logoutBtn.style.display = '';
+            userInfo.textContent = 'Logged in as: ' + (user.displayName || user.email);
+            // Enable to-do list
+            if (typeof loadTasks === 'function') loadTasks();
+          }
         } else {
+          errorDiv.style.display = 'none';
           loginSection.style.display = '';
           protectedContent.style.display = 'none';
           logoutBtn.style.display = 'none';
