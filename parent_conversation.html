@@ -8,6 +8,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <style>
+    .nightly-summary-label {
+      font-size: 0.475em;
+    }
     body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; }
     html, body {
       height: 100vh;
@@ -54,9 +57,43 @@
     .chat-message .time { color: #888; font-size: 0.85em; margin-left: 0.5em; }
     .chat-input-row {
       display: flex;
-      gap: 0.5rem;
       width: 100%;
       box-sizing: border-box;
+      gap: 0.5rem;
+    }
+    .chat-send-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 0.5rem;
+      width: 100%;
+    }
+    .chat-send {
+      padding: 0.5rem 2rem;
+      background: #0052a3;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .back-main-btn {
+      display: block;
+      margin: 0 auto 1rem auto;
+      padding: 0.5rem 0;
+      width: 260px;
+      background: #e7f1ff;
+      color: #0052a3;
+      border: 1px solid #b3d4fc;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      text-align: center;
+      font-weight: bold;
+      box-shadow: 0 1px 4px #0001;
+      transition: background 0.2s;
+    }
+    .back-main-btn:hover {
+      background: #d0e7ff;
     }
     .chat-input { flex: 1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
     .chat-send { padding: 0.5rem 1rem; background: #0052a3; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
@@ -69,13 +106,15 @@
     <h1 style="margin:0;">West Valley Elementary FLL Explore Team 2 [FLLEX2WV] Hub</h1>
   </header>
   <div class="chat-container">
-    <button onclick="window.location.href='index.html'" style="margin-bottom:1rem;padding:0.5rem 1rem;background:#eee;border:1px solid #ccc;border-radius:4px;cursor:pointer;float:right;">Back to Main Page</button>
+    <button class="back-main-btn" onclick="window.location.href='index.html'">Back to Main Page</button>
     <div class="chat-header">
       Parent Conversation
-      <button class="chat-logout" id="logout-btn" style="display:none;">Logout</button>
       <span class="chat-user" id="user-info"></span>
-      <div style="margin-top:0.5rem; font-size:0.95em;">
-        <label><input type="checkbox" id="nightly-summary-checkbox"> Receive nightly summary email</label>
+      <div style="margin-top:0.5rem;">
+        <label class="nightly-summary-label"><input type="checkbox" id="nightly-summary-checkbox"> Receive nightly summary email</label>
+      </div>
+      <div style="margin-top:0.5rem;">
+        <button class="chat-logout" id="logout-btn" style="display:none;">Logout</button>
       </div>
     </div>
     <div id="login-section">
@@ -85,6 +124,8 @@
       <div class="chat-messages" id="chat-messages"></div>
       <div class="chat-input-row">
         <input type="text" id="chat-input" class="chat-input" placeholder="Type your message..." />
+      </div>
+      <div class="chat-send-row">
         <button id="chat-send" class="chat-send">Send</button>
       </div>
     </div>
