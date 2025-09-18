@@ -1,0 +1,11 @@
+{
+  "name": "parent-nightly-summary",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "dotenv": "^17.2.2",
+    "firebase-admin": "^11.10.1",
+    "firebase-functions": "^4.4.1",
+    "nodemailer": "^6.9.8"
+  }
+}
