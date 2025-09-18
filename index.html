@@ -212,7 +212,7 @@
   <main>
   <section id="welcome">
     <!-- The illustration is loaded from the repository root as team_cartoon.png -->
-  <img src="IMG_5632.png" alt="Kids building a robot" style="max-width:75%;height:auto;display:block;margin:0 auto 1rem;" />
+  <img src="IMG_5632.png" alt="Kids building a robot" style="max-width:85%;height:auto;display:block;margin:0 auto 1rem;" />
     <p style="text-align:center;font-size:1.2rem;">West Valley Elementary FIRST LEGO League </p>
     <p style="text-align:center;font-size:1.2rem;"> Explore Team #2 aka FLLEX2WV </p>
     <p style="text-align:center;">
@@ -406,13 +406,8 @@
       const loginBtn = document.getElementById('login-btn');
       const logoutBtn = document.getElementById('logout-btn');
       const userInfo = document.getElementById('user-info');
-      const emailAuthForm = document.getElementById('email-auth-form');
-      const emailLoginBtn = document.getElementById('email-login-btn');
-      const emailSignupBtn = document.getElementById('email-signup-btn');
-      const emailInput = document.getElementById('email-input');
-      const passwordInput = document.getElementById('password-input');
-      const emailAuthMessage = document.getElementById('email-auth-message');
 
+      // Only Google login is enabled
       if (!window.firebase || !window.firebase.auth) {
         console.error('[Firebase] SDK not loaded!');
         return;
@@ -434,6 +429,15 @@
         auth.signOut();
       };
 
+      /*
+      // Email login code (commented out for future use)
+      const emailAuthForm = document.getElementById('email-auth-form');
+      const emailLoginBtn = document.getElementById('email-login-btn');
+      const emailSignupBtn = document.getElementById('email-signup-btn');
+      const emailInput = document.getElementById('email-input');
+      const passwordInput = document.getElementById('password-input');
+      const emailAuthMessage = document.getElementById('email-auth-message');
+
       emailLoginBtn.onclick = async () => {
         emailAuthMessage.textContent = '';
         try {
@@ -453,6 +457,7 @@
           console.error('[Auth] Email signup failed:', e);
         }
       };
+      */
 
       // Auth state observer with allowUser check
   // Insert access denied message just below the email login form
