@@ -234,6 +234,7 @@
       <button id="login-btn">Login with Google</button>
       <span id="user-info" style="margin-left:1rem;"></span>
     </div>
+    <!--
     <div id="email-auth-form" style="max-width:350px;margin:1rem auto;">
       <input type="email" id="email-input" placeholder="Email" style="width:100%;margin-bottom:0.5rem;" />
       <input type="password" id="password-input" placeholder="Password" style="width:100%;margin-bottom:0.5rem;" />
@@ -241,6 +242,7 @@
       <button id="email-signup-btn" style="width:100%;">Create Account</button>
       <div id="email-auth-message" style="color:red;margin-top:0.5rem;"></div>
     </div>
+    -->
   </section>
   <!-- Protected Section -->
   <div id="protected-content" style="display:none;">
@@ -453,26 +455,30 @@
       };
 
       // Auth state observer with allowUser check
-      const errorDiv = document.createElement('div');
+  // Insert access denied message just below the email login form
+  // (reuse emailAuthForm variable already declared above)
+  const errorDiv = document.createElement('div');
       errorDiv.id = 'access-denied';
       errorDiv.style.display = 'none';
       errorDiv.style.textAlign = 'center';
-      errorDiv.style.margin = '2rem auto';
+      errorDiv.style.margin = '1.5rem auto 0 auto';
       errorDiv.innerHTML = `
         <div style="color:#b00;font-size:1.2rem;font-weight:bold;margin-bottom:1rem;">Access Denied</div>
         <div style="margin-bottom:1rem;">Your email is not authorized to access this site.</div>
         <button id="contact-admin-btn" style="padding:0.5rem 1.5rem;background:#0052a3;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:1rem;">Contact Admin</button>
-        <div id="admin-email" style="display:none;margin-top:1rem;">Admin email: <span style="font-weight:bold;">vikasy@gmail.com</span></div>
         <div id="admin-confirm" style="display:none;margin-top:1rem;color:#0052a3;font-weight:bold;">Admin has been contacted. Bye.</div>
       `;
-      document.body.appendChild(errorDiv);
+      if (emailAuthForm && emailAuthForm.parentNode) {
+        emailAuthForm.parentNode.insertBefore(errorDiv, emailAuthForm.nextSibling);
+      } else {
+        document.body.appendChild(errorDiv);
+      }
 
       document.addEventListener('click', function(e) {
         if (e.target && e.target.id === 'contact-admin-btn') {
-          document.getElementById('admin-email').style.display = '';
+          document.getElementById('admin-confirm').style.display = '';
           setTimeout(() => {
-            document.getElementById('admin-email').style.display = 'none';
-            document.getElementById('admin-confirm').style.display = '';
+            document.getElementById('admin-confirm').style.display = 'none';
           }, 3000);
         }
       });
