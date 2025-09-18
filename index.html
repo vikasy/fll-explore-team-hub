@@ -75,11 +75,7 @@
     main {
       flex: 1;
       padding: 1rem;
-      /*
-        Set a flexible width so the layout shrinks on small screens.  On larger
-        displays the content is constrained to 1000px, but on phones and tablets
-        it can collapse down to 100% of the viewport width.
-      */
+      /* Set a flexible width so the layout shrinks on small screens. On larger displays the content is constrained to 1000px, but on phones and tablets it can collapse down to 100% of the viewport width. */
       width: 100%;
       max-width: 1000px;
       margin: 0 auto;
@@ -107,7 +103,7 @@
       background-color: var(--secondary-color);
       font-weight: bold;
     }
-    /* Task list styling */
+  /* Task list styling */
     #task-list {
       list-style: none;
       padding: 0;
@@ -429,55 +425,27 @@
         auth.signOut();
       };
 
-      /*
-      // Email login code (commented out for future use)
-      const emailAuthForm = document.getElementById('email-auth-form');
-      const emailLoginBtn = document.getElementById('email-login-btn');
-      const emailSignupBtn = document.getElementById('email-signup-btn');
-      const emailInput = document.getElementById('email-input');
-      const passwordInput = document.getElementById('password-input');
-      const emailAuthMessage = document.getElementById('email-auth-message');
-
-      emailLoginBtn.onclick = async () => {
-        emailAuthMessage.textContent = '';
-        try {
-          await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
-        } catch (e) {
-          emailAuthMessage.textContent = e.message;
-          console.error('[Auth] Email login failed:', e);
-        }
-      };
-      emailSignupBtn.onclick = async () => {
-        emailAuthMessage.textContent = '';
-        try {
-          await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
-          emailAuthMessage.textContent = 'Account created!';
-        } catch (e) {
-          emailAuthMessage.textContent = e.message;
-          console.error('[Auth] Email signup failed:', e);
-        }
-      };
-      */
+  // Email login code removed for now (Google login only)
 
       // Auth state observer with allowUser check
-  // Insert access denied message just below the email login form
-  // (reuse emailAuthForm variable already declared above)
+  // Insert access denied message below login section (email login form removed)
   const errorDiv = document.createElement('div');
-      errorDiv.id = 'access-denied';
-      errorDiv.style.display = 'none';
-      errorDiv.style.textAlign = 'center';
-      errorDiv.style.margin = '1.5rem auto 0 auto';
-      errorDiv.innerHTML = `
-        <div style="color:#b00;font-size:1.2rem;font-weight:bold;margin-bottom:1rem;">Access Denied</div>
-        <div style="margin-bottom:1rem;">Your email is not authorized to access this site.</div>
-        <button id="contact-admin-btn" style="padding:0.5rem 1.5rem;background:#0052a3;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:1rem;">Contact Admin</button>
-        <div id="admin-confirm" style="display:none;margin-top:1rem;color:#0052a3;font-weight:bold;">Admin has been contacted. Bye.</div>
-      `;
-      if (emailAuthForm && emailAuthForm.parentNode) {
-        emailAuthForm.parentNode.insertBefore(errorDiv, emailAuthForm.nextSibling);
-      } else {
-        document.body.appendChild(errorDiv);
-      }
+  errorDiv.id = 'access-denied';
+  errorDiv.style.display = 'none';
+  errorDiv.style.textAlign = 'center';
+  errorDiv.style.margin = '1.5rem auto 0 auto';
+  errorDiv.innerHTML = `
+    <div style="color:#b00;font-size:1.2rem;font-weight:bold;margin-bottom:1rem;">Access Denied</div>
+    <div style="margin-bottom:1rem;">Your email is not authorized to access this site.</div>
+    <button id="contact-admin-btn" style="padding:0.5rem 1.5rem;background:#0052a3;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:1rem;">Contact Admin</button>
+    <div id="admin-confirm" style="display:none;margin-top:1rem;color:#0052a3;font-weight:bold;">Admin has been contacted. Bye.</div>
+  `;
+  // Place errorDiv after login section
+  if (loginSection && loginSection.parentNode) {
+    loginSection.parentNode.insertBefore(errorDiv, loginSection.nextSibling);
+  } else {
+    document.body.appendChild(errorDiv);
+  }
 
       document.addEventListener('click', function(e) {
         if (e.target && e.target.id === 'contact-admin-btn') {
