@@ -177,6 +177,15 @@
     </div>
   </div>
   <script>
+    // Allowlist of parent emails (from fll_parents_list.csv)
+    const allowUser = [
+      'samirbaid@gmail.com',
+      'dedhia.krina@gmail.com',
+      'juididolkr@gmail.com',
+      'namitachitre85@gmail.com',
+      'vikasy@gmail.com'
+    ];
+
     // Firebase config (reuse from main site)
     const firebaseConfig = {
       apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
@@ -208,6 +217,20 @@
     const nightlySummaryCheckbox = document.getElementById('nightly-summary-checkbox');
     auth.onAuthStateChanged(async user => {
       if (user) {
+        // Restrict access to allowUser list
+        const email = (user.email || '').toLowerCase();
+        if (!allowUser.includes(email)) {
+          alert('Access denied: Your email is not authorized to use this site.');
+          await auth.signOut();
+          loginSection.style.display = '';
+          chatSection.style.display = 'none';
+          logoutBtn.style.display = 'none';
+          userInfo.textContent = '';
+          nightlySummaryCheckbox.checked = false;
+          nightlySummaryCheckbox.disabled = true;
+          if (unsubscribe) unsubscribe();
+          return;
+        }
         loginSection.style.display = 'none';
         chatSection.style.display = '';
         logoutBtn.style.display = '';
