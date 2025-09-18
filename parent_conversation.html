@@ -96,13 +96,31 @@
       display: block;
       margin: 0.5rem auto 0 auto;
     }
+    .chat-user-logout-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
     .chat-user {
-      display: block;
       color: #0052a3;
       font-size: 1rem;
-      margin-left: 0;
       text-align: center;
-      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .chat-logout {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.25rem 0.75rem;
+      cursor: pointer;
+      text-align: center;
+      margin: 0;
+      display: inline-block;
     }
     .back-main-btn {
       display: block;
@@ -137,12 +155,12 @@
     <button class="back-main-btn" onclick="window.location.href='index.html'">Back to Main Page</button>
     <div class="chat-header">
       Parent Conversation
-      <span class="chat-user" id="user-info"></span>
-      <div style="margin-top:0.5rem;">
-        <label class="nightly-summary-label"><input type="checkbox" id="nightly-summary-checkbox"> Receive nightly summary email</label>
+      <div class="chat-user-logout-row">
+        <span class="chat-user" id="user-info"></span>
+        <button class="chat-logout" id="logout-btn" style="display:none;">Logout</button>
       </div>
       <div style="margin-top:0.5rem;">
-        <button class="chat-logout" id="logout-btn" style="display:none;">Logout</button>
+        <label class="nightly-summary-label"><input type="checkbox" id="nightly-summary-checkbox"> Receive nightly summary email</label>
       </div>
     </div>
     <div id="login-section">
