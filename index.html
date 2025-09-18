@@ -212,7 +212,13 @@
   <main>
   <section id="welcome">
     <!-- The illustration is loaded from the repository root as team_cartoon.png -->
-    <img src="IMG_5632.png" alt="Kids building a robot" style="max-width:100%;height:auto;display:block;margin:0 auto 1rem;" />
+  <img src="IMG_5632.png" alt="Kids building a robot" style="max-width:50%;height:auto;display:block;margin:0 auto 1rem;" />
+    /* Reduce welcome image size on mobile */
+    @media (max-width: 600px) {
+      #welcome img {
+        max-width: 90vw;
+      }
+    }
     <p style="text-align:center;font-size:1.2rem;">West Valley Elementary FIRST LEGO League </p>
     <p style="text-align:center;font-size:1.2rem;"> Explore Team #2 aka FLLEX2WV </p>
     <p style="text-align:center;">
