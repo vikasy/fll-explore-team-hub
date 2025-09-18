@@ -346,8 +346,8 @@
           const emails = [];
           const bodyRows = table.querySelectorAll('tbody tr');
           bodyRows.forEach((tr) => {
-            // Assume the third column (index 2) holds the parent email
-            const emailCell = tr.cells[2];
+            // Assume the fourth column (index 3) holds the parent email
+            const emailCell = tr.cells[3];
             if (emailCell) {
               const email = emailCell.textContent.trim();
               if (email) {
@@ -359,12 +359,22 @@
           if (emails.length > 0) {
             const p = document.createElement('p');
             p.style.marginTop = '0.5rem';
-            const link = document.createElement('a');
-            link.href = 'mailto:' + emails.join(',');
-            link.textContent = 'Email all parents';
-            link.style.color = 'var(--primary-color)';
-            link.style.textDecoration = 'underline';
-            p.appendChild(link);
+            // Email all parents link
+            const emailLink = document.createElement('a');
+            emailLink.href = 'mailto:' + emails.join(',');
+            emailLink.textContent = 'Email all parents';
+            emailLink.style.color = 'var(--primary-color)';
+            emailLink.style.textDecoration = 'underline';
+            p.appendChild(emailLink);
+            // Spacer
+            p.appendChild(document.createTextNode(' | '));
+            // Parent Conversation link
+            const convoLink = document.createElement('a');
+            convoLink.href = 'parent_conversation.html';
+            convoLink.textContent = 'Parent Conversation';
+            convoLink.style.color = 'var(--primary-color)';
+            convoLink.style.textDecoration = 'underline';
+            p.appendChild(convoLink);
             rosterContainer.appendChild(p);
           }
         }
