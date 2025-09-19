@@ -18,7 +18,17 @@
     #media-upload { margin-bottom: 1rem; }
     #media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 1rem; }
     .media-item { background: #fff; border: 1px solid #dddddd; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); display: flex; flex-direction: column; }
-    .media-preview { width: 100%; aspect-ratio: 1/1; background: #eee; display: flex; align-items: center; justify-content: center; }
+    .media-preview {
+      width: 100%;
+      aspect-ratio: 1/1;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 80px;
+      max-height: 120px;
+      padding: 0;
+    }
     .media-meta { padding: 0.5rem 0.75rem 0.25rem 0.75rem; font-size: 0.95rem; color: #555; }
     .media-comments { padding: 0.5rem 0.75rem 0.75rem 0.75rem; border-top: 1px solid #eee; }
     @media (max-width: 600px) { main { padding: 0.5rem; } }
@@ -28,7 +38,7 @@
   <main>
     <h1>Team Media (Photos & Videos)</h1>
     <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
-      <b>Note:</b> Photos must be less than 5MB. Videos must be less than 1GB.
+      <b>Note:</b> Photos must be less than 2MB. Videos must be less than 200MB.
     </div>
     <div id="media-upload" style="display:none;">
       <input type="file" id="media-file" accept="image/*,video/*" style="margin-bottom:0.5rem;" />
@@ -55,22 +65,29 @@
       'dedhia.krina@gmail.com',
       'juididolkr@gmail.com',
       'namitachitre85@gmail.com',
-      'vikasy@gmail.com'
+      'vikasy@gmail.com',
+      'yadavnaom@gmail.com'
     ];
     // Firebase config (copy from index.html)
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
       apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
       authDomain: "fllex2wv.firebaseapp.com",
       projectId: "fllex2wv",
-      storageBucket: "fllex2wv.appspot.com",
+      storageBucket: "fllex2wv.firebasestorage.app",
       messagingSenderId: "105509048133",
-      appId: "1:105509048133:web:2655ec171befe83d09b82c"
+      appId: "1:105509048133:web:2655ec171befe83d09b82c",
+      measurementId: "G-2YXJTCCFL8"
     };
+    // Initialize Firebase using the global firebase object
     firebase.initializeApp(firebaseConfig);
     if (firebase.analytics) { firebase.analytics(); }
-    // --- Team Media Instagram-like UI ---
     const storage = firebase.storage();
     const db = firebase.firestore();
+    // Debug: log storage and db after initialization
+    console.log('[DEBUG] storage:', storage);
+    console.log('[DEBUG] db:', db);
     const mediaGrid = document.getElementById('media-grid');
     const mediaUploadDiv = document.getElementById('media-upload');
     const mediaFileInput = document.getElementById('media-file');
@@ -88,12 +105,12 @@
       // File size checks
       const isImage = file.type.startsWith('image');
       const isVideo = file.type.startsWith('video');
-      if (isImage && file.size > 5 * 1024 * 1024) { // 5MB
-        mediaUploadStatus.textContent = 'Photo is too large (max 5MB).';
+      if (isImage && file.size > 2 * 1024 * 1024) { // 2MB
+        mediaUploadStatus.textContent = 'Photo is too large (max 2MB).';
         return;
       }
-      if (isVideo && file.size > 1024 * 1024 * 1024) { // 1GB
-        mediaUploadStatus.textContent = 'Video is too large (max 1GB).';
+      if (isVideo && file.size > 200 * 1024 * 1024) { // 200MB
+        mediaUploadStatus.textContent = 'Video is too large (max 200MB).';
         return;
       }
       mediaUploadStatus.textContent = 'Uploading...';
@@ -103,6 +120,9 @@
         const ext = file.name.split('.').pop();
         const ts = Date.now();
         const storageRef = storage.ref().child(`media/${user.uid}_${ts}.${ext}`);
+        // Debug: log file and storageRef
+        console.log('[DEBUG] File:', file);
+        console.log('[DEBUG] storageRef:', storageRef.fullPath);
         const snapshot = await storageRef.put(file);
         const url = await snapshot.ref.getDownloadURL();
         const mediaDoc = {
@@ -118,6 +138,11 @@
         loadMedia();
       } catch (e) {
         mediaUploadStatus.textContent = 'Upload failed: ' + e.message;
+        // Log the full error object for debugging
+        console.error('[UPLOAD ERROR]', e);
+        if (e && e.serverResponse) {
+          console.error('[UPLOAD ERROR serverResponse]', e.serverResponse);
+        }
       }
     });
     async function loadMedia() {
@@ -134,14 +159,16 @@
           img.src = data.url;
           img.alt = 'Team media';
           img.style.maxWidth = '100%';
-          img.style.maxHeight = '180px';
+          img.style.maxHeight = '110px';
+          img.style.objectFit = 'contain';
           preview.appendChild(img);
         } else if (data.type === 'video') {
           const vid = document.createElement('video');
           vid.src = data.url;
           vid.controls = true;
           vid.style.maxWidth = '100%';
-          vid.style.maxHeight = '180px';
+          vid.style.maxHeight = '110px';
+          vid.style.objectFit = 'contain';
           preview.appendChild(vid);
         }
         const meta = item.querySelector('.media-meta');
