@@ -295,14 +295,7 @@
     <!-- Financials subsection -->
     <section id="financials">
       <h2>Financials</h2>
-      <ul>
-        <li>
-          <a href="money_matters/FLLEX2WV_Registration_Fee.jpeg" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
-            Registration Fee Receipt
-          </a>
-        </li>
-        <!-- Add more items here as needed -->
-      </ul>
+      <div id="financials-container">Loading financials…</div>
     </section>
     <section id="log-out">
         <button id="logout-btn" style="display:none;">Logout</button>
@@ -472,6 +465,57 @@
       .catch(() => {
         document.getElementById('roster-container').textContent =
           'Could not load roster.';
+      });
+
+    // --- Financials Table ---
+    fetch('fll_financials_list.csv')
+      .then((response) => response.text())
+      .then((text) => {
+        const rows = text.trim().split('\n').map((line) => line.split(','));
+        // For the Notes column, if it contains a semicolon and a file path, make a link
+        for (let i = 1; i < rows.length; i++) {
+          const notes = rows[i][5] || '';
+          if (notes.includes(';')) {
+            const [desc, file] = notes.split(';');
+            if (file && file.match(/\.(jpg|jpeg|png|pdf)$/i)) {
+              rows[i][5] = desc + ` (<a href="${file}" target="_blank">receipt</a>)`;
+            } else {
+              rows[i][5] = desc;
+            }
+          }
+        }
+        // Build the table
+        const container = document.getElementById('financials-container');
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        rows[0].forEach((cell) => {
+          const th = document.createElement('th');
+          th.textContent = cell;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+        const tbody = document.createElement('tbody');
+        for (let i = 1; i < rows.length; i++) {
+          const tr = document.createElement('tr');
+          rows[i].forEach((cell, idx) => {
+            const td = document.createElement('td');
+            if (idx === 5 && cell.includes('<a ')) {
+              td.innerHTML = cell;
+            } else {
+              td.textContent = cell;
+            }
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        }
+        table.appendChild(tbody);
+        container.innerHTML = '';
+        container.appendChild(table);
+      })
+      .catch(() => {
+        document.getElementById('financials-container').textContent = 'Could not load financials.';
       });
 
     // --- Server-based To-Do List Implementation ---
