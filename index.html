@@ -103,6 +103,20 @@
       background-color: var(--secondary-color);
       font-weight: bold;
     }
+    /* Timeline color coding */
+    .timeline-past {
+      background-color: #f0f0f0;
+      color: #888;
+    }
+    .timeline-next {
+      background-color: #fff3cd;
+      color: #856404;
+      font-weight: bold;
+    }
+    .timeline-future {
+      background-color: #e7f1ff;
+      color: #0052a3;
+    }
   /* Task list styling */
     #task-list {
       list-style: none;
@@ -329,11 +343,68 @@
       container.innerHTML = '';
       container.appendChild(table);
     }
+    function buildTimelineTable(rows, containerId) {
+      if (!rows || rows.length === 0) return;
+      const container = document.getElementById(containerId);
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      rows[0].forEach((cell) => {
+        const th = document.createElement('th');
+        th.textContent = cell;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      // Helper to get YYYY-MM-DD string
+      function toYMD(date) {
+        return date.getFullYear() + '-' + (date.getMonth()+1).toString().padStart(2,'0') + '-' + date.getDate().toString().padStart(2,'0');
+      }
+      const todayObj = new Date();
+      const todayYMD = toYMD(todayObj);
+      let nextIdx = -1;
+      for (let i = 1; i < rows.length; i++) {
+        const dateStr = rows[i][0];
+        const eventDate = new Date(dateStr);
+        const eventYMD = toYMD(eventDate);
+        if (!isNaN(eventDate) && eventYMD >= todayYMD) {
+          nextIdx = i;
+          break;
+        }
+      }
+      for (let i = 1; i < rows.length; i++) {
+        const tr = document.createElement('tr');
+        const dateStr = rows[i][0];
+        const eventDate = new Date(dateStr);
+        const eventYMD = toYMD(eventDate);
+        let rowClass = '';
+        if (!isNaN(eventDate)) {
+          if (eventYMD < todayYMD) {
+            rowClass = 'timeline-past';
+          } else if (i === nextIdx) {
+            rowClass = 'timeline-next';
+          } else if (i > nextIdx) {
+            rowClass = 'timeline-future';
+          }
+        }
+        if (rowClass) tr.classList.add(rowClass);
+        rows[i].forEach((cell) => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+      container.innerHTML = '';
+      container.appendChild(table);
+    }
     fetch('fll_explore_timeline_2025_26.csv')
       .then((response) => response.text())
       .then((text) => {
         const rows = text.trim().split('\n').map((line) => line.split(','));
-        buildTable(rows, 'timeline-container');
+        buildTimelineTable(rows, 'timeline-container');
       })
       .catch(() => {
         document.getElementById('timeline-container').textContent =
