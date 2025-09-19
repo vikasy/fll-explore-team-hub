@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Media | WV FLL Explore FLLEX2WV Hub</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; }
+    main { max-width: 900px; margin: 0 auto; padding: 1.5rem; background: #fff; min-height: 100vh; }
+    h1 { color: #0052a3; text-align: center; }
+    #media-upload { margin-bottom: 1rem; }
+    #media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 1rem; }
+    .media-item { background: #fff; border: 1px solid #dddddd; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); display: flex; flex-direction: column; }
+    .media-preview { width: 100%; aspect-ratio: 1/1; background: #eee; display: flex; align-items: center; justify-content: center; }
+    .media-meta { padding: 0.5rem 0.75rem 0.25rem 0.75rem; font-size: 0.95rem; color: #555; }
+    .media-comments { padding: 0.5rem 0.75rem 0.75rem 0.75rem; border-top: 1px solid #eee; }
+    @media (max-width: 600px) { main { padding: 0.5rem; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Team Media (Photos & Videos)</h1>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+      <b>Note:</b> Photos must be less than 5MB. Videos must be less than 1GB.
+    </div>
+    <div id="media-upload" style="display:none;">
+      <input type="file" id="media-file" accept="image/*,video/*" style="margin-bottom:0.5rem;" />
+      <button id="media-upload-btn">Upload</button>
+      <span id="media-upload-status" style="margin-left:1rem;color:#0052a3;"></span>
+    </div>
+    <div id="media-grid"></div>
+    <div id="media-empty-msg" style="text-align:center;color:#888;margin-top:1rem;display:none;">No media yet. Be the first to upload a photo or video!</div>
+    <template id="media-item-template">
+      <div class="media-item">
+        <div class="media-preview"></div>
+        <div class="media-meta"></div>
+        <div class="media-comments"></div>
+      </div>
+    </template>
+    <div style="text-align:center;margin-top:2rem;">
+      <a href="index.html" style="color:#0052a3;text-decoration:underline;">&larr; Back to Team Hub</a>
+    </div>
+  </main>
+  <script>
+    // Allowlist of parent emails (copy from index.html)
+    const allowUser = [
+      'samirbaid@gmail.com',
+      'dedhia.krina@gmail.com',
+      'juididolkr@gmail.com',
+      'namitachitre85@gmail.com',
+      'vikasy@gmail.com'
+    ];
+    // Firebase config (copy from index.html)
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
+      authDomain: "fllex2wv.firebaseapp.com",
+      projectId: "fllex2wv",
+      storageBucket: "fllex2wv.appspot.com",
+      messagingSenderId: "105509048133",
+      appId: "1:105509048133:web:2655ec171befe83d09b82c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    if (firebase.analytics) { firebase.analytics(); }
+    // --- Team Media Instagram-like UI ---
+    const storage = firebase.storage();
+    const db = firebase.firestore();
+    const mediaGrid = document.getElementById('media-grid');
+    const mediaUploadDiv = document.getElementById('media-upload');
+    const mediaFileInput = document.getElementById('media-file');
+    const mediaUploadBtn = document.getElementById('media-upload-btn');
+    const mediaUploadStatus = document.getElementById('media-upload-status');
+    const mediaEmptyMsg = document.getElementById('media-empty-msg');
+    const mediaItemTemplate = document.getElementById('media-item-template');
+    function showMediaUploadUI(isAllowed) {
+      if (isAllowed) { mediaUploadDiv.style.display = ''; }
+      else { mediaUploadDiv.style.display = 'none'; }
+    }
+    mediaUploadBtn.addEventListener('click', async () => {
+      const file = mediaFileInput.files[0];
+      if (!file) { mediaUploadStatus.textContent = 'Please select a file.'; return; }
+      // File size checks
+      const isImage = file.type.startsWith('image');
+      const isVideo = file.type.startsWith('video');
+      if (isImage && file.size > 5 * 1024 * 1024) { // 5MB
+        mediaUploadStatus.textContent = 'Photo is too large (max 5MB).';
+        return;
+      }
+      if (isVideo && file.size > 1024 * 1024 * 1024) { // 1GB
+        mediaUploadStatus.textContent = 'Video is too large (max 1GB).';
+        return;
+      }
+      mediaUploadStatus.textContent = 'Uploading...';
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) throw new Error('Not logged in');
+        const ext = file.name.split('.').pop();
+        const ts = Date.now();
+        const storageRef = storage.ref().child(`media/${user.uid}_${ts}.${ext}`);
+        const snapshot = await storageRef.put(file);
+        const url = await snapshot.ref.getDownloadURL();
+        const mediaDoc = {
+          url,
+          type: file.type.startsWith('video') ? 'video' : 'image',
+          uploadedBy: user.displayName || user.email,
+          uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          comments: []
+        };
+        await db.collection('media').add(mediaDoc);
+        mediaUploadStatus.textContent = 'Upload successful!';
+        mediaFileInput.value = '';
+        loadMedia();
+      } catch (e) {
+        mediaUploadStatus.textContent = 'Upload failed: ' + e.message;
+      }
+    });
+    async function loadMedia() {
+      mediaGrid.innerHTML = '';
+      mediaEmptyMsg.style.display = 'none';
+      const snap = await db.collection('media').orderBy('uploadedAt', 'desc').get();
+      if (snap.empty) { mediaEmptyMsg.style.display = ''; return; }
+      snap.forEach(doc => {
+        const data = doc.data();
+        const item = mediaItemTemplate.content.cloneNode(true);
+        const preview = item.querySelector('.media-preview');
+        if (data.type === 'image') {
+          const img = document.createElement('img');
+          img.src = data.url;
+          img.alt = 'Team media';
+          img.style.maxWidth = '100%';
+          img.style.maxHeight = '180px';
+          preview.appendChild(img);
+        } else if (data.type === 'video') {
+          const vid = document.createElement('video');
+          vid.src = data.url;
+          vid.controls = true;
+          vid.style.maxWidth = '100%';
+          vid.style.maxHeight = '180px';
+          preview.appendChild(vid);
+        }
+        const meta = item.querySelector('.media-meta');
+        meta.textContent = `By ${data.uploadedBy || 'Unknown'}${data.uploadedAt && data.uploadedAt.toDate ? ' • ' + data.uploadedAt.toDate().toLocaleString() : ''}`;
+        const commentsDiv = item.querySelector('.media-comments');
+        const comments = Array.isArray(data.comments) ? data.comments : [];
+        const commentsList = document.createElement('div');
+        commentsList.style.marginBottom = '0.5rem';
+        comments.forEach(c => {
+          const cdiv = document.createElement('div');
+          cdiv.style.marginBottom = '0.25rem';
+          cdiv.innerHTML = `<b>${c.by || 'Anon'}:</b> ${c.text}`;
+          commentsList.appendChild(cdiv);
+        });
+        commentsDiv.appendChild(commentsList);
+        if (firebase.auth().currentUser && allowUser.includes(firebase.auth().currentUser.email.toLowerCase())) {
+          const form = document.createElement('form');
+          form.style.display = 'flex';
+          form.style.gap = '0.5rem';
+          form.onsubmit = async (e) => {
+            e.preventDefault();
+            const input = form.querySelector('input');
+            const text = input.value.trim();
+            if (!text) return;
+            input.disabled = true;
+            try {
+              const user = firebase.auth().currentUser;
+              const newComment = { by: user.displayName || user.email, text, at: new Date().toISOString() };
+              await db.collection('media').doc(doc.id).update({
+                comments: firebase.firestore.FieldValue.arrayUnion(newComment)
+              });
+              loadMedia();
+            } catch (err) {
+              alert('Failed to add comment: ' + err.message);
+            } finally {
+              input.disabled = false;
+              input.value = '';
+            }
+          };
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.placeholder = 'Add a comment...';
+          input.style.flex = '1';
+          const btn = document.createElement('button');
+          btn.type = 'submit';
+          btn.textContent = 'Post';
+          btn.style.background = '#0052a3';
+          btn.style.color = '#fff';
+          btn.style.border = 'none';
+          btn.style.borderRadius = '4px';
+          btn.style.padding = '0.25rem 0.75rem';
+          form.appendChild(input);
+          form.appendChild(btn);
+          commentsDiv.appendChild(form);
+        }
+        mediaGrid.appendChild(item);
+      });
+    }
+    firebase.auth().onAuthStateChanged(user => {
+      showMediaUploadUI(user && allowUser.includes((user.email || '').toLowerCase()));
+      if (user) loadMedia();
+      else {
+        mediaGrid.innerHTML = '';
+        mediaEmptyMsg.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
