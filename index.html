@@ -519,7 +519,7 @@
       });
 
     // --- Server-based To-Do List Implementation ---
-    const API_URL = 'https://fllex2wv.wm.r.appspot.com/api/tasks';
+  const API_URL = 'https://us-central1-fllex2wv.cloudfunctions.net/api/tasks';
 
     window.addEventListener('DOMContentLoaded', () => {
       console.log('[App] DOMContentLoaded');
@@ -619,9 +619,10 @@
           if (!res.ok) throw new Error('Failed to fetch tasks: ' + res.status);
           const data = await res.json();
           console.log('Fetched tasks:', data);
-          // Ensure data is an array of objects with id and task
+          // Ensure data is an array of objects with id, text, and done
           if (!Array.isArray(data)) return [];
-          return data.filter(obj => obj && typeof obj.task === 'string' && obj.id);
+          return data.filter(obj => obj && typeof obj.text === 'string' && obj.id)
+            .map(obj => ({ ...obj, done: !!obj.done }));
         } catch (e) {
           console.error('Error fetching tasks:', e);
           alert('Error fetching tasks: ' + e.message);
@@ -629,12 +630,12 @@
         }
       }
 
-      async function postTask(task) {
+      async function postTask(text) {
         try {
           const res = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ task })
+            body: JSON.stringify({ text })
           });
           if (!res.ok) throw new Error('Failed to add task: ' + res.status);
           const data = await res.json();
@@ -664,11 +665,38 @@
         const listEl = document.getElementById('task-list');
         listEl.innerHTML = '';
         tasks.forEach((taskObj) => {
-          // Defensive: fallback if taskObj is missing fields
-          const taskText = (taskObj && typeof taskObj.task === 'string') ? taskObj.task : '[No task]';
+          const taskText = (taskObj && typeof taskObj.text === 'string') ? taskObj.text : '[No task]';
           const taskId = (taskObj && taskObj.id) ? taskObj.id : null;
+          const done = !!(taskObj && taskObj.done);
           const li = document.createElement('li');
-          li.textContent = taskText;
+          // Checkbox
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = done;
+          checkbox.style.marginRight = '0.75rem';
+          checkbox.addEventListener('change', async () => {
+            if (!taskId) return;
+            try {
+              await fetch(`${API_URL}/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ done: checkbox.checked })
+              });
+            } catch (e) {
+              alert('Failed to update task status.');
+            }
+            loadTasks();
+          });
+          li.appendChild(checkbox);
+          // Task text
+          const span = document.createElement('span');
+          span.textContent = taskText;
+          if (done) {
+            span.style.textDecoration = 'line-through';
+            span.style.color = '#888';
+          }
+          li.appendChild(span);
+          // Remove button
           if (taskId) {
             const removeBtn = document.createElement('button');
             removeBtn.textContent = 'Remove';

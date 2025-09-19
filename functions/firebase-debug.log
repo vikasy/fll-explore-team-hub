@@ -1,0 +1,82 @@
+[debug] [2025-09-19T18:07:15.542Z] ----------------------------------------------------------------------
+[debug] [2025-09-19T18:07:15.551Z] Command:       /usr/local/Cellar/node/24.7.0/bin/node /usr/local/bin/firebase init functions
+[debug] [2025-09-19T18:07:15.551Z] CLI Version:   14.17.0
+[debug] [2025-09-19T18:07:15.551Z] Platform:      darwin
+[debug] [2025-09-19T18:07:15.551Z] Node Version:  v24.7.0
+[debug] [2025-09-19T18:07:15.551Z] Time:          Fri Sep 19 2025 11:07:15 GMT-0700 (Pacific Daylight Time)
+[debug] [2025-09-19T18:07:15.551Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-09-19T18:07:15.760Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-09-19T18:07:15.760Z] > authorizing via signed-in user (fll2025.westvalley.cusdk8@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /Users/vikasyadav/Library/CloudStorage/OneDrive-Personal/Documents/GitHub/fll-explore-team-hub
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2025-09-19T18:07:15.778Z] Using project from CLI flag: fllex2wv
+[debug] [2025-09-19T18:07:15.779Z] Checked if tokens are valid: false, expires at: 1758305158209
+[debug] [2025-09-19T18:07:15.780Z] Checked if tokens are valid: false, expires at: 1758305158209
+[debug] [2025-09-19T18:07:15.780Z] > refreshing access token with scopes: []
+[debug] [2025-09-19T18:07:15.782Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-09-19T18:07:15.782Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-09-19T18:07:15.955Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-09-19T18:07:15.955Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-09-19T18:07:16.000Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fllex2wv [none]
+[debug] [2025-09-19T18:07:16.214Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fllex2wv 200
+[debug] [2025-09-19T18:07:16.215Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fllex2wv {"projectId":"fllex2wv","projectNumber":"105509048133","displayName":"fllex2wv","name":"projects/fllex2wv","resources":{"hostingSite":"fllex2wv","locationId":"us-west3"},"state":"ACTIVE","etag":"1_c5e854e6-2edb-4fd8-ab9d-b2214fd2b842"}
+[info] i  Using project fllex2wv (fllex2wv) 
+[info] 
+=== Functions Setup
+[debug] [2025-09-19T18:07:16.346Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-09-19T18:07:16.346Z] > authorizing via signed-in user (fll2025.westvalley.cusdk8@gmail.com)
+[debug] [2025-09-19T18:07:16.346Z] [iam] checking project fllex2wv for permissions ["firebase.projects.get"]
+[debug] [2025-09-19T18:07:16.347Z] Checked if tokens are valid: true, expires at: 1758308834955
+[debug] [2025-09-19T18:07:16.347Z] Checked if tokens are valid: true, expires at: 1758308834955
+[debug] [2025-09-19T18:07:16.347Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/fllex2wv:testIamPermissions [none]
+[debug] [2025-09-19T18:07:16.347Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/fllex2wv:testIamPermissions x-goog-quota-user=projects/fllex2wv
+[debug] [2025-09-19T18:07:16.347Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fllex2wv:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-09-19T18:07:16.523Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/fllex2wv:testIamPermissions 200
+[debug] [2025-09-19T18:07:16.523Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fllex2wv:testIamPermissions {"permissions":["firebase.projects.get"]}
+[info] 
+Detected existing codebase(s): default
+
+[info] Let's create a new codebase for your functions.
+[info] A directory corresponding to the codebase will be created in your project
+[info] with sample code pre-configured.
+
+[info] See https://firebase.google.com/docs/functions/organize-functions for
+[info] more information on organizing your functions using codebases.
+
+[info] Functions can be deployed with firebase deploy.
+
+[error] functions.source must be unique but 'functions' was used more than once.
+[debug] [2025-09-19T18:08:05.917Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (/usr/local/lib/node_modules/firebase-tools/node_modules/@inquirer/core/dist/commonjs/lib/create-prompt.js:101:37)
+    at Interface.emit (node:events:508:28)
+    at Interface.emit (node:domain:489:12)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1315:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:284:20)
+    at ReadStream.emit (node:events:520:35)
+    at ReadStream.emit (node:domain:489:12)
+    at emitKeys (node:internal/readline/utils:371:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+[error] 
+[error] Error: An unexpected error has occurred.
