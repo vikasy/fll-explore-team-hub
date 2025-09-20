@@ -123,32 +123,110 @@
     mediaUploadBtn.addEventListener('click', async () => {
       const file = mediaFileInput.files[0];
       if (!file) { mediaUploadStatus.textContent = 'Please select a file.'; return; }
-      // File size checks
       const isImage = file.type.startsWith('image');
       const isVideo = file.type.startsWith('video');
-      if (isImage && file.size > 2 * 1024 * 1024) { // 2MB
-        mediaUploadStatus.textContent = 'Photo is too large (max 2MB).';
-        return;
+      // Video: warn and offer to compress if over 200MB
+      if (isVideo && file.size > 200 * 1024 * 1024) {
+        if (!window.ffmpegLoaded) {
+          mediaUploadStatus.textContent = 'Loading video compression tools (first time may take 30+ seconds)...';
+          // Dynamically load ffmpeg.wasm
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js';
+          script.onload = () => { window.ffmpegLoaded = true; };
+          document.body.appendChild(script);
+          await new Promise(r => setTimeout(r, 3000)); // Give it a moment to load
+        }
+        if (!window.ffmpeg) {
+          mediaUploadStatus.textContent = 'Video compression tool failed to load. Please try again or use a smaller video.';
+          return;
+        }
+        if (!confirm('This video is over 200MB. Compressing it in the browser may take several minutes and use a lot of memory. Continue?')) {
+          mediaUploadStatus.textContent = 'Upload cancelled.';
+          return;
+        }
+        mediaUploadStatus.textContent = 'Compressing video (this may take several minutes)...';
+        try {
+          const { createFFmpeg, fetchFile } = window.FFmpeg;
+          const ffmpeg = createFFmpeg({ log: true });
+          await ffmpeg.load();
+          ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
+          // Compress: scale to 720p, lower bitrate
+          await ffmpeg.run('-i', 'input.mp4', '-vf', 'scale=1280:720', '-b:v', '1M', '-preset', 'veryfast', 'output.mp4');
+          const data = ffmpeg.FS('readFile', 'output.mp4');
+          const compressedBlob = new Blob([data.buffer], { type: 'video/mp4' });
+          if (compressedBlob.size > 200 * 1024 * 1024) {
+            mediaUploadStatus.textContent = 'Compressed video is still too large. Please trim or compress before uploading.';
+            return;
+          }
+          uploadFile = new File([compressedBlob], file.name.replace(/\.[^.]+$/, '.mp4'), { type: 'video/mp4' });
+        } catch (err) {
+          mediaUploadStatus.textContent = 'Video compression failed. Please try a smaller video.';
+          return;
+        }
       }
-      if (isVideo && file.size > 200 * 1024 * 1024) { // 200MB
-        mediaUploadStatus.textContent = 'Video is too large (max 200MB).';
-        return;
+      let uploadFile = file;
+      // Image: resize if over 2MB or if width/height > 1600px
+      if (isImage) {
+        const needsResize = file.size > 2 * 1024 * 1024;
+        if (needsResize) {
+          try {
+            const img = new Image();
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              img.src = e.target.result;
+            };
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+            // Resize logic
+            const maxDim = 1600;
+            let { width, height } = img;
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round(height * (maxDim / width));
+                width = maxDim;
+              } else {
+                width = Math.round(width * (maxDim / height));
+                height = maxDim;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            // Compress to JPEG, quality 0.85
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            // Convert dataURL to Blob
+            const resBlob = await (await fetch(dataUrl)).blob();
+            if (resBlob.size > 2 * 1024 * 1024) {
+              mediaUploadStatus.textContent = 'Photo is still too large after resizing.';
+              return;
+            }
+            uploadFile = new File([resBlob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+          } catch (err) {
+            mediaUploadStatus.textContent = 'Failed to resize image.';
+            return;
+          }
+        }
       }
       mediaUploadStatus.textContent = 'Uploading...';
       try {
         const user = firebase.auth().currentUser;
         if (!user) throw new Error('Not logged in');
-        const ext = file.name.split('.').pop();
+        const ext = uploadFile.name.split('.').pop();
         const ts = Date.now();
         const storageRef = storage.ref().child(`media/${user.uid}_${ts}.${ext}`);
         // Debug: log file and storageRef
-        console.log('[DEBUG] File:', file);
+        console.log('[DEBUG] File:', uploadFile);
         console.log('[DEBUG] storageRef:', storageRef.fullPath);
-        const snapshot = await storageRef.put(file);
+        const snapshot = await storageRef.put(uploadFile);
         const url = await snapshot.ref.getDownloadURL();
         const mediaDoc = {
           url,
-          type: file.type.startsWith('video') ? 'video' : 'image',
+          type: isVideo ? 'video' : 'image',
           uploadedBy: user.displayName || user.email,
           uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
           comments: []
