@@ -35,12 +35,12 @@
   </style>
 </head>
 <body>
-  <header style="background:#0052a3;color:#fff;padding:1rem 1rem 1rem 1rem;position:relative;">
+  <header style="background:#0052a3;color:#fff;padding:1rem 1rem 1rem 1rem;">
     <h1 style="margin:0;">West Valley Elementary FLL Explore Team 2 [FLLEX2WV] Hub</h1>
-    <a href="index.html" style="position:absolute;top:1.2rem;right:1.5rem;background:#fff;color:#0052a3;padding:0.4rem 1.1rem;border-radius:6px;font-weight:bold;text-decoration:none;box-shadow:0 1px 4px #0002;font-size:1rem;">Back to Main</a>
   </header>
   <div class="main-bounding-box">
   <main>
+    <button class="back-main-btn" onclick="window.location.href='index.html'">Back to Main Page</button>
     <h1>Team Media (Photos & Videos)</h1>
     <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
       <b>Note:</b> Photos must be less than 2MB. Videos must be less than 200MB.
@@ -59,12 +59,28 @@
         <div class="media-comments"></div>
       </div>
     </template>
-    <div style="text-align:center;margin-top:2rem;">
-      <a href="index.html" style="color:#0052a3;text-decoration:underline;">&larr; Back to Team Hub</a>
-    </div>
   </main>
   </div>
   <style>
+    .back-main-btn {
+      display: block;
+      margin: 0 0 1rem 0;
+      padding: 0.5rem 0;
+      width: 260px;
+      background: #e7f1ff;
+      color: #0052a3;
+      border: 1px solid #b3d4fc;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      text-align: center;
+      font-weight: bold;
+      box-shadow: 0 1px 4px #0001;
+      transition: background 0.2s;
+    }
+    .back-main-btn:hover {
+      background: #d0e7ff;
+    }
     .main-bounding-box {
       width: 98%;
       max-width: 1000px;
