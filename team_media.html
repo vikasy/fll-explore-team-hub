@@ -43,7 +43,7 @@
     <button class="back-main-btn" onclick="window.location.href='index.html'">Back to Main Page</button>
     <h1>Team Media (Photos & Videos)</h1>
     <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
-      <b>Note:</b> Photos must be less than 2MB. Videos must be less than 200MB.
+      <b>Note:</b> Photos must be less than 2MB. Videos must be less than 20MB.
     </div>
     <div id="media-upload" style="display:none;">
       <input type="file" id="media-file" accept="image/*,video/*" style="margin-bottom:0.5rem;" />
@@ -157,7 +157,7 @@
           mediaUploadStatus.textContent = 'Video compression tool failed to load. Please try again or use a smaller video.';
           return;
         }
-        if (!confirm('This video is over 200MB. Compressing it in the browser may take several minutes and use a lot of memory. Continue?')) {
+        if (!confirm('This video is over 20MB. Compressing it in the browser may take several minutes and use a lot of memory. Continue?')) {
           mediaUploadStatus.textContent = 'Upload cancelled.';
           return;
         }
