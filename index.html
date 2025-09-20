@@ -230,7 +230,7 @@
   <main>
   <section id="welcome">
     <!-- The illustration is loaded from the repository root as team_cartoon.png -->
-  <img src="IMG_5632.png" alt="Kids building a robot" style="max-width:85%;height:auto;display:block;margin:0 auto 1rem;" />
+  <img src="images/IMG_5632.png" alt="Kids building a robot" style="max-width:85%;height:auto;display:block;margin:0 auto 1rem;" />
     <p style="text-align:center;font-size:1.2rem;">West Valley Elementary FIRST LEGO League </p>
     <p style="text-align:center;font-size:1.2rem;"> Explore Team #2 aka FLLEX2WV </p>
     <p style="text-align:center;">
@@ -244,6 +244,15 @@
       Simple URL:
       <a href="https://westvalley.short.gy/fllexplore" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
         westvalley.short.gy/fllexplore
+      </a>
+    </p>
+    <!-- Resource links -->
+    <p style="text-align:center;">
+      <a href="https://www.firstinspires.org/resource-library/fll/explore/challenge-and-resources" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Resources page
+      </a>:
+      <a href="documents/fll-explore-unearthed-tmg.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        Team Meeting Guide PDF
       </a>
     </p>
   </section>
@@ -411,7 +420,7 @@
       container.innerHTML = '';
       container.appendChild(table);
     }
-    fetch('fll_explore_timeline_2025_26.csv')
+    fetch('csv-files/fll_explore_timeline_2025_26.csv')
       .then((response) => response.text())
       .then((text) => {
         const rows = text.trim().split('\n').map((line) => line.split(','));
@@ -421,7 +430,7 @@
         document.getElementById('timeline-container').textContent =
           'Could not load timeline.';
       });
-    fetch('fll_parents_list.csv')
+    fetch('csv-files/fll_parents_list.csv')
       .then((response) => response.text())
       .then((text) => {
         const rows = text.trim().split('\n').map((line) => line.split(','));
@@ -474,7 +483,7 @@
       });
 
     // --- Financials Table ---
-    fetch('fll_financials_list.csv')
+    fetch('csv-files/fll_financials_list.csv')
       .then((response) => response.text())
       .then((text) => {
         const rows = text.trim().split('\n').map((line) => line.split(','));
