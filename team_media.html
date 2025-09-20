@@ -125,8 +125,8 @@
       if (!file) { mediaUploadStatus.textContent = 'Please select a file.'; return; }
       const isImage = file.type.startsWith('image');
       const isVideo = file.type.startsWith('video');
-      // Video: warn and offer to compress if over 200MB
-      if (isVideo && file.size > 200 * 1024 * 1024) {
+  // Video: warn and offer to compress if over 20MB
+  if (isVideo && file.size > 20 * 1024 * 1024) {
         if (!window.ffmpegLoaded) {
           mediaUploadStatus.textContent = 'Loading video compression tools (first time may take 30+ seconds)...';
           // Dynamically load ffmpeg.wasm
@@ -154,8 +154,8 @@
           await ffmpeg.run('-i', 'input.mp4', '-vf', 'scale=1280:720', '-b:v', '1M', '-preset', 'veryfast', 'output.mp4');
           const data = ffmpeg.FS('readFile', 'output.mp4');
           const compressedBlob = new Blob([data.buffer], { type: 'video/mp4' });
-          if (compressedBlob.size > 200 * 1024 * 1024) {
-            mediaUploadStatus.textContent = 'Compressed video is still too large. Please trim or compress before uploading.';
+          if (compressedBlob.size > 20 * 1024 * 1024) {
+            mediaUploadStatus.textContent = 'Compressed video is still too large (max 20MB). Please trim or compress before uploading.';
             return;
           }
           uploadFile = new File([compressedBlob], file.name.replace(/\.[^.]+$/, '.mp4'), { type: 'video/mp4' });
@@ -202,7 +202,7 @@
             // Convert dataURL to Blob
             const resBlob = await (await fetch(dataUrl)).blob();
             if (resBlob.size > 2 * 1024 * 1024) {
-              mediaUploadStatus.textContent = 'Photo is still too large after resizing.';
+              mediaUploadStatus.textContent = 'Photo is still too large after resizing (max 2MB).';
               return;
             }
             uploadFile = new File([resBlob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
