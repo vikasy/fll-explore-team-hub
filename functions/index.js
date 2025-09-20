@@ -40,8 +40,8 @@ app.use(express.json());
 
 const TASKS_COLLECTION = "tasks";
 
-// GET /api/tasks - list all tasks
-app.get("/api/tasks", async (req, res) => {
+// GET /tasks - list all tasks
+app.get("/tasks", async (req, res) => {
   try {
     const snapshot = await db.collection(TASKS_COLLECTION).get();
     const tasks = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
@@ -52,8 +52,8 @@ app.get("/api/tasks", async (req, res) => {
   }
 });
 
-// POST /api/tasks - add a new task
-app.post("/api/tasks", async (req, res) => {
+// POST /tasks - add a new task
+app.post("/tasks", async (req, res) => {
   try {
     const {text, done} = req.body;
     if (typeof text !== "string") {
@@ -74,8 +74,8 @@ app.post("/api/tasks", async (req, res) => {
   }
 });
 
-// PATCH /api/tasks/:id - update a task (e.g., mark done)
-app.patch("/api/tasks/:id", async (req, res) => {
+// PATCH /tasks/:id - update a task (e.g., mark done)
+app.patch("/tasks/:id", async (req, res) => {
   try {
     const {id} = req.params;
     const {done} = req.body;
@@ -90,8 +90,8 @@ app.patch("/api/tasks/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/tasks/:id - delete a task
-app.delete("/api/tasks/:id", async (req, res) => {
+// DELETE /tasks/:id - delete a task
+app.delete("/tasks/:id", async (req, res) => {
   try {
     const {id} = req.params;
     await db.collection(TASKS_COLLECTION).doc(id).delete();
