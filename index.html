@@ -130,9 +130,8 @@
       border: 1px solid var(--border-color);
       display: flex;
       align-items: center;
-    }
-    #task-list li button {
-      margin-right: auto;
+      flex-direction: row;
+      flex-wrap: wrap;
     }
     #task-list li span, #task-list li input[type="checkbox"] {
       margin-left: 1rem;
@@ -291,7 +290,7 @@
     <section id="tasks">
       <h2>Team To‑Dos</h2>
       <div>
-        <input type="text" id="task-input" placeholder="Add a new task" />
+        <textarea id="task-input" placeholder="Add one or more tasks (one per line)" rows="3" style="width:70%;max-width:400px;resize:vertical;"></textarea>
         <button id="task-add">Add</button>
       </div>
       <ul id="task-list"></ul>
@@ -676,7 +675,8 @@
       }
 
       async function loadTasks() {
-        const tasks = await fetchTasks();
+        let tasks = await fetchTasks();
+        // Show tasks in the order they were added (oldest first)
         const listEl = document.getElementById('task-list');
         listEl.innerHTML = '';
         tasks.forEach((taskObj) => {
@@ -684,11 +684,11 @@
           const taskId = (taskObj && taskObj.id) ? taskObj.id : null;
           const done = !!(taskObj && taskObj.done);
           const li = document.createElement('li');
-          // Checkbox
+          // Checkbox (leftmost)
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
           checkbox.checked = done;
-          checkbox.style.marginRight = '0.75rem';
+          checkbox.style.marginRight = '1rem';
           checkbox.addEventListener('change', async () => {
             if (!taskId) return;
             try {
@@ -703,7 +703,7 @@
             loadTasks();
           });
           li.appendChild(checkbox);
-          // Task text
+          // Task text (middle)
           const span = document.createElement('span');
           span.textContent = taskText;
           if (done) {
@@ -711,10 +711,11 @@
             span.style.color = '#888';
           }
           li.appendChild(span);
-          // Remove button
+          // Remove button (rightmost)
           if (taskId) {
             const removeBtn = document.createElement('button');
             removeBtn.textContent = 'Remove';
+            removeBtn.style.marginLeft = 'auto';
             removeBtn.addEventListener('click', async () => {
               await deleteTask(taskId);
               loadTasks();
@@ -727,9 +728,11 @@
 
       document.getElementById('task-add').addEventListener('click', async () => {
         const inputEl = document.getElementById('task-input');
-        const text = inputEl.value.trim();
-        if (text) {
-          await postTask(text);
+        const lines = inputEl.value.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+        if (lines.length) {
+          for (const line of lines) {
+            await postTask(line);
+          }
           inputEl.value = '';
           loadTasks();
         }

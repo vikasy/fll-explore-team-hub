@@ -43,9 +43,9 @@ const TASKS_COLLECTION = "tasks";
 // GET /tasks - list all tasks
 app.get("/tasks", async (req, res) => {
   try {
-    const snapshot = await db.collection(TASKS_COLLECTION).get();
-    const tasks = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
-    res.json(tasks);
+  const snapshot = await db.collection(TASKS_COLLECTION).orderBy('created').get();
+  const tasks = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
+  res.json(tasks);
   } catch (err) {
     logger.error("GET /api/tasks error", err);
     res.status(500).json({error: "Failed to fetch tasks"});
@@ -59,13 +59,15 @@ app.post("/tasks", async (req, res) => {
     if (typeof text !== "string") {
       return res.status(400).json({error: "Missing or invalid 'text'"});
     }
+    const now = new Date().toISOString();
     const docRef = await db
         .collection(TASKS_COLLECTION)
-        .add({text, done: !!done});
+        .add({text, done: !!done, created: now});
     const response = {
       id: docRef.id,
       text,
       done: !!done,
+      created: now
     };
     res.status(201).json(response);
   } catch (err) {
