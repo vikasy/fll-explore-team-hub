@@ -43,7 +43,8 @@ const ALL_TASKS = "tasks";
 // GET /tasks - list all tasks
 app.get("/tasks", async (req, res) => {
   try {
-    const snapshot = await db.collection(ALL_TASKS).orderBy("created").get();
+    // Order by 'created' timestamp ascending (oldest first)
+    const snapshot = await db.collection(ALL_TASKS).orderBy("created", "asc").get();// eslint-disable-line max-len
     const tasks = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
     res.json(tasks);
   } catch (err) {
@@ -59,15 +60,18 @@ app.post("/tasks", async (req, res) => {
     if (typeof text !== "string") {
       return res.status(400).json({error: "Missing or invalid 'text'"});
     }
-    const now = new Date().toISOString();
+    const now = admin.firestore.FieldValue.serverTimestamp();
     const docRef = await db
         .collection(ALL_TASKS)
         .add({text, done: !!done, created: now});
+    // Fetch the document to get the resolved timestamp
+    const docSnap = await docRef.get();
+    const data = docSnap.data();
     const response = {
       id: docRef.id,
-      text,
-      done: !!done,
-      created: now,
+      text: data.text,
+      done: data.done,
+      created: data.created,
     };
     res.status(201).json(response);
   } catch (err) {
