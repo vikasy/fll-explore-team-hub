@@ -1,0 +1,544 @@
+[
+  {
+    "file": "lh-index.report.json",
+    "url": "https://vikasy.github.io/fll-explore-team-hub/index.html",
+    "performance": 0.61,
+    "accessibility": 1,
+    "bestPractices": 0.75,
+    "seo": 0.91,
+    "performanceDetails": {
+      "first-contentful-paint": {
+        "score": 0.16,
+        "displayValue": "4.5 s"
+      },
+      "speed-index": {
+        "score": 0.62,
+        "displayValue": "5.1 s"
+      },
+      "largest-contentful-paint": {
+        "score": 0,
+        "displayValue": "10.6 s"
+      },
+      "interactive": {
+        "score": 0.23,
+        "displayValue": "10.6 s"
+      },
+      "total-blocking-time": {
+        "score": 0.95,
+        "displayValue": "150 ms"
+      },
+      "cumulative-layout-shift": {
+        "score": 1,
+        "displayValue": "0",
+        "details": [
+          {
+            "cumulativeLayoutShiftMainFrame": 0,
+            "newEngineResult": {
+              "cumulativeLayoutShift": 0,
+              "cumulativeLayoutShiftMainFrame": 0
+            },
+            "newEngineResultDiffered": false
+          }
+        ]
+      },
+      "uses-optimized-images": {
+        "score": 1,
+        "displayValue": "",
+        "details": []
+      },
+      "uses-responsive-images": {
+        "score": 0,
+        "displayValue": "Est savings of 1,002 KiB",
+        "details": [
+          {
+            "node": {
+              "type": "node",
+              "lhId": "1-30-IMG",
+              "path": "1,HTML,1,BODY,1,DIV,0,MAIN,0,SECTION,1,IMG",
+              "selector": "div.main-bounding-box > main > section#welcome > img",
+              "boundingRect": {
+                "top": 193,
+                "bottom": 401,
+                "left": 66,
+                "right": 378,
+                "width": 313,
+                "height": 208
+              },
+              "snippet": "<img src=\"images/IMG_5632.png\" alt=\"Kids building a robot\" style=\"max-width:85%;height:auto;display:block;margin:0 auto 1rem;\">",
+              "nodeLabel": "Kids building a robot"
+            },
+            "url": "https://vikasy.github.io/fll-explore-team-hub/images/IMG_5632.png",
+            "totalBytes": 1130573,
+            "wastedBytes": 1026214,
+            "wastedPercent": 90.76939814814816
+          }
+        ]
+      },
+      "uses-text-compression": {
+        "score": 1,
+        "displayValue": "",
+        "details": []
+      },
+      "unused-javascript": {
+        "score": 0,
+        "displayValue": "Est savings of 76 KiB",
+        "details": [
+          {
+            "url": "https://www.googletagmanager.com/gtag/js?l=dataLayer&id=G-2YXJTCCFL8",
+            "totalBytes": 128197,
+            "wastedBytes": 52640,
+            "wastedPercent": 41.06202957867488
+          },
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js",
+            "totalBytes": 38107,
+            "wastedBytes": 25616,
+            "wastedPercent": 67.22066722142371,
+            "subItems": {
+              "type": "subitems",
+              "items": [
+                {
+                  "source": "…auth/src/core/user/user_impl.ts",
+                  "sourceBytes": 1208,
+                  "sourceWastedBytes": 1202
+                },
+                {
+                  "source": "…auth/src/core/auth/auth_impl.ts",
+                  "sourceBytes": 2332,
+                  "sourceWastedBytes": 1200
+                },
+                {
+                  "source": "…auth/src/platform_cordova/popup_redirect/utils.ts",
+                  "sourceBytes": 873,
+                  "sourceWastedBytes": 873
+                },
+                {
+                  "source": "…auth-compat/src/auth.ts",
+                  "sourceBytes": 1057,
+                  "sourceWastedBytes": 778
+                },
+                {
+                  "source": "…auth/src/platform_browser/recaptcha/recaptcha_verifier.ts",
+                  "sourceBytes": 789,
+                  "sourceWastedBytes": 769
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "render-blocking-resources": {
+        "score": 0,
+        "displayValue": "Est savings of 2,630 ms",
+        "details": [
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js",
+            "totalBytes": 38217,
+            "wastedMs": 479
+          },
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js",
+            "totalBytes": 9402,
+            "wastedMs": 786
+          }
+        ]
+      },
+      "uses-long-cache-ttl": {
+        "score": 0.5,
+        "displayValue": "2 resources found",
+        "details": [
+          {
+            "url": "https://vikasy.github.io/fll-explore-team-hub/images/IMG_5632.png",
+            "debugData": {
+              "type": "debugdata",
+              "max-age": 600
+            },
+            "cacheLifetimeMs": 600000,
+            "cacheHitProbability": 0.08333333333333333,
+            "totalBytes": 1131413,
+            "wastedBytes": 1037128.5833333333
+          },
+          {
+            "url": "https://fllex2wv.firebaseapp.com/__/auth/iframe.js",
+            "debugData": {
+              "type": "debugdata",
+              "max-age": 1800
+            },
+            "cacheLifetimeMs": 1800000,
+            "cacheHitProbability": 0.1375,
+            "totalBytes": 92122,
+            "wastedBytes": 79455.225
+          }
+        ]
+      },
+      "uses-http2": {
+        "score": 1,
+        "details": []
+      }
+    }
+  },
+  {
+    "file": "lh-parent_conversation.report.json",
+    "url": "https://vikasy.github.io/fll-explore-team-hub/parent_conversation.html",
+    "performance": 0.72,
+    "accessibility": 1,
+    "bestPractices": 0.96,
+    "seo": 0.9,
+    "performanceDetails": {
+      "first-contentful-paint": {
+        "score": 0.14,
+        "displayValue": "4.6 s"
+      },
+      "speed-index": {
+        "score": 0.71,
+        "displayValue": "4.6 s"
+      },
+      "largest-contentful-paint": {
+        "score": 0.32,
+        "displayValue": "4.7 s"
+      },
+      "interactive": {
+        "score": 0.8,
+        "displayValue": "4.7 s"
+      },
+      "total-blocking-time": {
+        "score": 1,
+        "displayValue": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "score": 1,
+        "displayValue": "0",
+        "details": [
+          {
+            "cumulativeLayoutShiftMainFrame": 0,
+            "newEngineResult": {
+              "cumulativeLayoutShift": 0,
+              "cumulativeLayoutShiftMainFrame": 0
+            },
+            "newEngineResultDiffered": false
+          }
+        ]
+      },
+      "uses-optimized-images": {
+        "score": 1,
+        "displayValue": "",
+        "details": []
+      },
+      "uses-responsive-images": {
+        "score": 1,
+        "displayValue": "",
+        "details": []
+      },
+      "uses-text-compression": {
+        "score": 1,
+        "displayValue": "",
+        "details": []
+      },
+      "unused-javascript": {
+        "score": 0,
+        "displayValue": "Est savings of 118 KiB",
+        "details": [
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js",
+            "totalBytes": 100851,
+            "wastedBytes": 94881,
+            "wastedPercent": 94.07998301996923,
+            "subItems": {
+              "type": "subitems",
+              "items": [
+                {
+                  "source": "…firestore/dist/index.esm2017.js",
+                  "sourceBytes": 79577,
+                  "sourceWastedBytes": 76001
+                },
+                {
+                  "source": "…firestore-compat/src/api/database.ts",
+                  "sourceBytes": 2902,
+                  "sourceWastedBytes": 2804
+                },
+                {
+                  "source": "…webchannel-wrapper/node_modules/google-closure-library/closure/goog/labs/net/webchannel/webchannelbase.js",
+                  "sourceBytes": 1939,
+                  "sourceWastedBytes": 1902
+                },
+                {
+                  "source": "…webchannel-wrapper/node_modules/google-closure-library/closure/goog/crypt/md5.js",
+                  "sourceBytes": 1742,
+                  "sourceWastedBytes": 1725
+                },
+                {
+                  "source": "…webchannel-wrapper/node_modules/google-closure-library/closure/goog/math/integer.js",
+                  "sourceBytes": 1233,
+                  "sourceWastedBytes": 1122
+                }
+              ]
+            }
+          },
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js",
+            "totalBytes": 38107,
+            "wastedBytes": 25616,
+            "wastedPercent": 67.22066722142371,
+            "subItems": {
+              "type": "subitems",
+              "items": [
+                {
+                  "source": "…auth/src/core/user/user_impl.ts",
+                  "sourceBytes": 1208,
+                  "sourceWastedBytes": 1202
+                },
+                {
+                  "source": "…auth/src/core/auth/auth_impl.ts",
+                  "sourceBytes": 2332,
+                  "sourceWastedBytes": 1200
+                },
+                {
+                  "source": "…auth/src/platform_cordova/popup_redirect/utils.ts",
+                  "sourceBytes": 873,
+                  "sourceWastedBytes": 873
+                },
+                {
+                  "source": "…auth-compat/src/auth.ts",
+                  "sourceBytes": 1057,
+                  "sourceWastedBytes": 778
+                },
+                {
+                  "source": "…auth/src/platform_browser/recaptcha/recaptcha_verifier.ts",
+                  "sourceBytes": 789,
+                  "sourceWastedBytes": 769
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "render-blocking-resources": {
+        "score": 0,
+        "displayValue": "Est savings of 3,710 ms",
+        "details": [
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js",
+            "totalBytes": 100962,
+            "wastedMs": 995
+          },
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js",
+            "totalBytes": 38194,
+            "wastedMs": 332
+          },
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js",
+            "totalBytes": 9862,
+            "wastedMs": 802
+          }
+        ]
+      },
+      "uses-long-cache-ttl": {
+        "score": 0.5,
+        "displayValue": "1 resource found",
+        "details": [
+          {
+            "url": "https://fllex2wv.firebaseapp.com/__/auth/iframe.js",
+            "debugData": {
+              "type": "debugdata",
+              "max-age": 1800
+            },
+            "cacheLifetimeMs": 1800000,
+            "cacheHitProbability": 0.1375,
+            "totalBytes": 92122,
+            "wastedBytes": 79455.225
+          }
+        ]
+      },
+      "uses-http2": {
+        "score": 1,
+        "details": []
+      }
+    }
+  },
+  {
+    "file": "lh-team_media.report.json",
+    "url": "https://vikasy.github.io/fll-explore-team-hub/team_media.html",
+    "performance": 0.67,
+    "accessibility": 1,
+    "bestPractices": 0.96,
+    "seo": 0.9,
+    "performanceDetails": {
+      "first-contentful-paint": {
+        "score": 0.15,
+        "displayValue": "4.5 s"
+      },
+      "speed-index": {
+        "score": 0.72,
+        "displayValue": "4.5 s"
+      },
+      "largest-contentful-paint": {
+        "score": 0.16,
+        "displayValue": "5.7 s"
+      },
+      "interactive": {
+        "score": 0.68,
+        "displayValue": "5.7 s"
+      },
+      "total-blocking-time": {
+        "score": 0.98,
+        "displayValue": "100 ms"
+      },
+      "cumulative-layout-shift": {
+        "score": 1,
+        "displayValue": "0",
+        "details": [
+          {
+            "cumulativeLayoutShiftMainFrame": 0,
+            "newEngineResult": {
+              "cumulativeLayoutShift": 0,
+              "cumulativeLayoutShiftMainFrame": 0
+            },
+            "newEngineResultDiffered": false
+          }
+        ]
+      },
+      "uses-optimized-images": {
+        "score": 1,
+        "displayValue": "",
+        "details": []
+      },
+      "uses-responsive-images": {
+        "score": 1,
+        "displayValue": "",
+        "details": []
+      },
+      "uses-text-compression": {
+        "score": 1,
+        "displayValue": "",
+        "details": []
+      },
+      "unused-javascript": {
+        "score": 0,
+        "displayValue": "Est savings of 169 KiB",
+        "details": [
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js",
+            "totalBytes": 100851,
+            "wastedBytes": 94881,
+            "wastedPercent": 94.07998301996923,
+            "subItems": {
+              "type": "subitems",
+              "items": [
+                {
+                  "source": "…firestore/dist/index.esm2017.js",
+                  "sourceBytes": 79577,
+                  "sourceWastedBytes": 76001
+                },
+                {
+                  "source": "…firestore-compat/src/api/database.ts",
+                  "sourceBytes": 2902,
+                  "sourceWastedBytes": 2804
+                },
+                {
+                  "source": "…webchannel-wrapper/node_modules/google-closure-library/closure/goog/labs/net/webchannel/webchannelbase.js",
+                  "sourceBytes": 1939,
+                  "sourceWastedBytes": 1902
+                },
+                {
+                  "source": "…webchannel-wrapper/node_modules/google-closure-library/closure/goog/crypt/md5.js",
+                  "sourceBytes": 1742,
+                  "sourceWastedBytes": 1725
+                },
+                {
+                  "source": "…webchannel-wrapper/node_modules/google-closure-library/closure/goog/math/integer.js",
+                  "sourceBytes": 1233,
+                  "sourceWastedBytes": 1122
+                }
+              ]
+            }
+          },
+          {
+            "url": "https://www.googletagmanager.com/gtag/js?l=dataLayer&id=G-2YXJTCCFL8",
+            "totalBytes": 128180,
+            "wastedBytes": 52814,
+            "wastedPercent": 41.20275496953907
+          },
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js",
+            "totalBytes": 38107,
+            "wastedBytes": 25616,
+            "wastedPercent": 67.22066722142371,
+            "subItems": {
+              "type": "subitems",
+              "items": [
+                {
+                  "source": "…auth/src/core/user/user_impl.ts",
+                  "sourceBytes": 1208,
+                  "sourceWastedBytes": 1202
+                },
+                {
+                  "source": "…auth/src/core/auth/auth_impl.ts",
+                  "sourceBytes": 2332,
+                  "sourceWastedBytes": 1200
+                },
+                {
+                  "source": "…auth/src/platform_cordova/popup_redirect/utils.ts",
+                  "sourceBytes": 873,
+                  "sourceWastedBytes": 873
+                },
+                {
+                  "source": "…auth-compat/src/auth.ts",
+                  "sourceBytes": 1057,
+                  "sourceWastedBytes": 778
+                },
+                {
+                  "source": "…auth/src/platform_browser/recaptcha/recaptcha_verifier.ts",
+                  "sourceBytes": 789,
+                  "sourceWastedBytes": 769
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "render-blocking-resources": {
+        "score": 0,
+        "displayValue": "Est savings of 3,650 ms",
+        "details": [
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js",
+            "totalBytes": 100961,
+            "wastedMs": 961
+          },
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js",
+            "totalBytes": 38194,
+            "wastedMs": 320
+          },
+          {
+            "url": "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js",
+            "totalBytes": 9862,
+            "wastedMs": 806
+          }
+        ]
+      },
+      "uses-long-cache-ttl": {
+        "score": 0.5,
+        "displayValue": "1 resource found",
+        "details": [
+          {
+            "url": "https://fllex2wv.firebaseapp.com/__/auth/iframe.js",
+            "debugData": {
+              "type": "debugdata",
+              "max-age": 1800
+            },
+            "cacheLifetimeMs": 1800000,
+            "cacheHitProbability": 0.1375,
+            "totalBytes": 92121,
+            "wastedBytes": 79454.3625
+          }
+        ]
+      },
+      "uses-http2": {
+        "score": 1,
+        "details": []
+      }
+    }
+  }
+]

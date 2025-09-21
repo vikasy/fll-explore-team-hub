@@ -143,12 +143,15 @@
       else { mediaUploadDiv.style.display = 'none'; }
     }
     mediaUploadBtn.addEventListener('click', async () => {
-      const file = mediaFileInput.files[0];
+  console.log('[DEBUG] Upload button clicked');
+  const file = mediaFileInput.files[0];
+  console.log('[DEBUG] Selected file:', file);
       if (!file) { mediaUploadStatus.textContent = 'Please select a file.'; return; }
       const isImage = file.type.startsWith('image');
       const isVideo = file.type.startsWith('video');
       // Video: warn and offer to compress if over 20MB
       if (isVideo && file.size > 20 * 1024 * 1024) {
+  console.log('[DEBUG] Video is over 20MB, attempting to load ffmpeg.wasm');
         if (!window.ffmpegLoaded) {
           mediaUploadStatus.textContent = 'Loading video compression tools (first time may take 30+ seconds)...';
           // Dynamically load ffmpeg.wasm
@@ -165,6 +168,16 @@
         }
         if (!window.FFmpeg) {
           mediaUploadStatus.textContent = 'Video compression tool failed to load. Please try again or use a smaller video.';
+          console.error('[DEBUG] FFmpeg WASM not loaded. window.FFmpeg:', window.FFmpeg);
+          // 1. Debug WASM loading
+          if (!window.FFmpeg) {
+            console.error('[DEBUG] FFmpeg WASM script not loaded or not attached to window.');
+          }
+          // 4. Debug CORS/CDN
+          const scripts = Array.from(document.getElementsByTagName('script')).map(s => s.src);
+          console.log('[DEBUG] All loaded scripts:', scripts);
+          // 5. Debug browser compatibility
+          console.log('[DEBUG] User agent:', navigator.userAgent);
           return;
         }
         if (!confirm('This video is over 20MB. Compressing it in the browser may take several minutes and use a lot of memory. Continue?')) {
@@ -175,11 +188,34 @@
         try {
           const { createFFmpeg, fetchFile } = window.FFmpeg;
           const ffmpeg = createFFmpeg({ log: true });
+          console.log('[DEBUG] Calling ffmpeg.load()');
           await ffmpeg.load();
-          ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
+          console.log('[DEBUG] ffmpeg loaded');
+          // 2. Debug resource limits
+          try {
+            ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
+            console.log('[DEBUG] File written to ffmpeg FS');
+          } catch (e) {
+            console.error('[DEBUG] Error writing file to ffmpeg FS (resource/memory issue?)', e);
+            throw e;
+          }
           // Compress: scale to 720p, lower bitrate
-          await ffmpeg.run('-i', 'input.mp4', '-vf', 'scale=1280:720', '-b:v', '1M', '-preset', 'veryfast', 'output.mp4');
-          const data = ffmpeg.FS('readFile', 'output.mp4');
+          try {
+            await ffmpeg.run('-i', 'input.mp4', '-vf', 'scale=1280:720', '-b:v', '1M', '-preset', 'veryfast', 'output.mp4');
+            console.log('[DEBUG] ffmpeg run completed');
+          } catch (e) {
+            console.error('[DEBUG] Error running ffmpeg (resource/memory issue?)', e);
+            throw e;
+          }
+          // 3. Debug file API
+          let data;
+          try {
+            data = ffmpeg.FS('readFile', 'output.mp4');
+            console.log('[DEBUG] Output file read from ffmpeg FS');
+          } catch (e) {
+            console.error('[DEBUG] Error reading output file from ffmpeg FS', e);
+            throw e;
+          }
           const compressedBlob = new Blob([data.buffer], { type: 'video/mp4' });
           if (compressedBlob.size > 20 * 1024 * 1024) {
             mediaUploadStatus.textContent = 'Compressed video is still too large (max 20MB). Please trim or compress before uploading.';
