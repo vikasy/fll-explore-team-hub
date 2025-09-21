@@ -156,9 +156,14 @@
           script.src = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.min.js';
           script.onload = () => { window.ffmpegLoaded = true; };
           document.body.appendChild(script);
-          await new Promise(r => setTimeout(r, 3000)); // Give it a moment to load
+          // Wait for window.FFmpeg to be available
+          let waited = 0;
+          while (!window.FFmpeg && waited < 20000) { // wait up to 20s
+            await new Promise(r => setTimeout(r, 200));
+            waited += 200;
+          }
         }
-        if (!window.ffmpeg) {
+        if (!window.FFmpeg) {
           mediaUploadStatus.textContent = 'Video compression tool failed to load. Please try again or use a smaller video.';
           return;
         }
