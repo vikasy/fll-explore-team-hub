@@ -153,7 +153,7 @@
           mediaUploadStatus.textContent = 'Loading video compression tools (first time may take 30+ seconds)...';
           // Dynamically load ffmpeg.wasm
           const script = document.createElement('script');
-          script.src = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js';
+          script.src = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.min.js';
           script.onload = () => { window.ffmpegLoaded = true; };
           document.body.appendChild(script);
           await new Promise(r => setTimeout(r, 3000)); // Give it a moment to load
