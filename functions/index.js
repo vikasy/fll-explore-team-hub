@@ -38,14 +38,14 @@ const app = express();
 app.use(cors({origin: true}));
 app.use(express.json());
 
-const TASKS_COLLECTION = "tasks";
+const ALL_TASKS = "tasks";
 
 // GET /tasks - list all tasks
 app.get("/tasks", async (req, res) => {
   try {
-  const snapshot = await db.collection(TASKS_COLLECTION).orderBy('created').get();
-  const tasks = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
-  res.json(tasks);
+    const snapshot = await db.collection(ALL_TASKS).orderBy("created").get();
+    const tasks = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
+    res.json(tasks);
   } catch (err) {
     logger.error("GET /api/tasks error", err);
     res.status(500).json({error: "Failed to fetch tasks"});
@@ -61,13 +61,13 @@ app.post("/tasks", async (req, res) => {
     }
     const now = new Date().toISOString();
     const docRef = await db
-        .collection(TASKS_COLLECTION)
+        .collection(ALL_TASKS)
         .add({text, done: !!done, created: now});
     const response = {
       id: docRef.id,
       text,
       done: !!done,
-      created: now
+      created: now,
     };
     res.status(201).json(response);
   } catch (err) {
@@ -84,7 +84,7 @@ app.patch("/tasks/:id", async (req, res) => {
     if (typeof done !== "boolean") {
       return res.status(400).json({error: "Missing or invalid 'done'"});
     }
-    await db.collection(TASKS_COLLECTION).doc(id).update({done});
+    await db.collection(ALL_TASKS).doc(id).update({done});
     res.json({id, done});
   } catch (err) {
     logger.error("PATCH /api/tasks/:id error", err);
@@ -96,7 +96,7 @@ app.patch("/tasks/:id", async (req, res) => {
 app.delete("/tasks/:id", async (req, res) => {
   try {
     const {id} = req.params;
-    await db.collection(TASKS_COLLECTION).doc(id).delete();
+    await db.collection(ALL_TASKS).doc(id).delete();
     res.json({id});
   } catch (err) {
     logger.error("DELETE /api/tasks/:id error", err);
