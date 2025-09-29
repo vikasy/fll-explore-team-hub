@@ -474,6 +474,14 @@
             convoLink.style.color = 'var(--primary-color)';
             convoLink.style.textDecoration = 'underline';
             p.appendChild(convoLink);
+            // Student Conversation link (added after Parent Conversation)
+            p.appendChild(document.createTextNode(' | '));
+            const studentConvoLink = document.createElement('a');
+            studentConvoLink.href = 'student_conversation.html';
+            studentConvoLink.textContent = 'Student Conversation';
+            studentConvoLink.style.color = 'var(--primary-color)';
+            studentConvoLink.style.textDecoration = 'underline';
+            p.appendChild(studentConvoLink);
             rosterContainer.appendChild(p);
           }
         }

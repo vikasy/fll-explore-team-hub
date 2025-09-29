@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Conversation</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    /* ...existing code... */
+    .chat-message {
+      margin-bottom: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 12px;
+      max-width: 70%;
+      clear: both;
+      word-break: break-word;
+    }
+    .chat-message.self {
+      background: #e7f1ff;
+      color: #0052a3;
+      margin-left: auto;
+      margin-right: 0;
+      text-align: right;
+      border-top-right-radius: 0;
+    }
+    .chat-message.other {
+      background: #f5f5f5;
+      color: #333;
+      margin-right: auto;
+      margin-left: 0;
+      text-align: left;
+      border-top-left-radius: 0;
+    }
+    .chat-message.color-0 { background: #ffe4e1; color: #a33; }
+    .chat-message.color-1 { background: #e1f7e7; color: #217a3c; }
+    .chat-message.color-2 { background: #e1eaff; color: #223a7a; }
+    .chat-message.color-3 { background: #fffbe1; color: #7a6a22; }
+    .chat-message.color-4 { background: #f3e1ff; color: #6a227a; }
+    .chat-message.color-5 { background: #e1f3ff; color: #226a7a; }
+    .nightly-summary-label { font-size: 0.475em; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; }
+    html, body { height: 100vh; margin: 0; padding: 0; }
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .chat-container { width: 98%; max-width: 1000px; margin: 1rem auto; background: #fff; border-radius: 12px; border: 2px solid #b3d4fc; box-shadow: 0 2px 8px #0001; padding: 1rem; display: flex; flex-direction: column; height: 100%; min-height: 400px; resize: both; box-sizing: border-box; }
+    .chat-message { margin-bottom: 0.75rem; }
+    .chat-message .sender { font-weight: bold; color: #0052a3; }
+    .chat-message .time { color: #888; font-size: 0.85em; margin-left: 0.5em; }
+    .chat-input-row { display: flex; width: 100%; box-sizing: border-box; gap: 0.5rem; }
+    .chat-send-row { display: flex; justify-content: flex-start; margin-top: 0.5rem; width: 100%; }
+    .chat-logout { background: #e74c3c; color: #fff; border: none; border-radius: 4px; padding: 0.25rem 0.75rem; cursor: pointer; text-align: center; display: block; margin: 0.5rem auto 0 auto; }
+    .chat-user-logout-row { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+    .chat-user { color: #0052a3; font-size: 1rem; text-align: center; margin: 0; padding: 0; }
+    .chat-logout { background: #e74c3c; color: #fff; border: none; border-radius: 4px; padding: 0.25rem 0.75rem; cursor: pointer; text-align: center; margin: 0; display: inline-block; }
+    .back-main-btn { display: block; margin: 0 0 1rem 0; padding: 0.5rem 0; width: 260px; background: #e7f1ff; color: #0052a3; border: 1px solid #b3d4fc; border-radius: 4px; cursor: pointer; font-size: 1.1rem; text-align: center; font-weight: bold; box-shadow: 0 1px 4px #0001; transition: background 0.2s; }
+    .back-main-btn:hover { background: #d0e7ff; }
+    .chat-input { flex: 1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
+    .chat-send { padding: 0.5rem 1rem; background: #0052a3; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    .chat-logout { float: right; background: #e74c3c; color: #fff; border: none; border-radius: 4px; padding: 0.25rem 0.75rem; cursor: pointer; }
+    .chat-user { float: right; color: #0052a3; font-size: 1rem; margin-left: 1rem; }
+  </style>
+</head>
+<body>
+  <header style="background:#0052a3;color:#fff;padding:1rem 1rem 1rem 1rem;text-align:center;">
+    <h1 style="margin:0;">West Valley Elementary FLL Explore Team 2 [FLLEX2WV] Hub</h1>
+  </header>
+  <div class="chat-container">
+    <button class="back-main-btn" onclick="window.location.href='index.html'">Back to Main Page</button>
+    <div class="chat-header">
+      Student Conversation
+      <div class="chat-user-logout-row">
+        <span class="chat-user" id="user-info"></span>
+        <button class="chat-logout" id="logout-btn" style="display:none;">Logout</button>
+      </div>
+    </div>
+    <div id="login-section">
+      <button id="login-btn">Login with Google</button>
+    </div>
+    <div id="chat-section" style="display:none;">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Type your message..." />
+      </div>
+      <div class="chat-send-row">
+        <button id="chat-send" class="chat-send">Send</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Allowlist of student emails (add as needed)
+    const allowUser = [
+      'yadavnaom@gmail.com',
+      // Add more student emails here
+    ];
+
+    // Firebase config (reuse from main site)
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
+      authDomain: "fllex2wv.firebaseapp.com",
+      projectId: "fllex2wv",
+      storageBucket: "fllex2wv.appspot.com",
+      messagingSenderId: "105509048133",
+      appId: "1:105509048133:web:2655ec171befe83d09b82c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const loginSection = document.getElementById('login-section');
+    const chatSection = document.getElementById('chat-section');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userInfo = document.getElementById('user-info');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
+
+    loginBtn.onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => alert('Login failed: ' + err.message));
+    };
+    logoutBtn.onclick = () => auth.signOut();
+
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        // Restrict access to allowUser list
+        const email = (user.email || '').toLowerCase();
+        if (!allowUser.includes(email)) {
+          alert('Access denied: Your email is not authorized to use this site.');
+          await auth.signOut();
+          loginSection.style.display = '';
+          chatSection.style.display = 'none';
+          logoutBtn.style.display = 'none';
+          userInfo.textContent = '';
+          if (unsubscribe) unsubscribe();
+          return;
+        }
+        loginSection.style.display = 'none';
+        chatSection.style.display = '';
+        logoutBtn.style.display = '';
+        userInfo.textContent = user.displayName || user.email;
+        loadMessages();
+      } else {
+        loginSection.style.display = '';
+        chatSection.style.display = 'none';
+        logoutBtn.style.display = 'none';
+        userInfo.textContent = '';
+        if (unsubscribe) unsubscribe();
+      }
+    });
+
+    // Real-time Firestore chat
+    let unsubscribe = null;
+    // Assign a color index to each sender (except current user)
+    function getColorIndex(sender, selfEmail, senderMap) {
+      if (sender === selfEmail) return -1; // self
+      if (!(sender in senderMap)) {
+        senderMap[sender] = Object.keys(senderMap).length % 6;
+      }
+      return senderMap[sender];
+    }
+
+    function loadMessages() {
+      if (unsubscribe) unsubscribe();
+      unsubscribe = db.collection('student_conversation')
+        .orderBy('timestamp', 'asc')
+        .limit(100)
+        .onSnapshot(snapshot => {
+          chatMessages.innerHTML = '';
+          const selfEmail = auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email) : '';
+          const senderMap = {};
+          snapshot.forEach(doc => {
+            const msg = doc.data();
+            const div = document.createElement('div');
+            let className = 'chat-message';
+            if (msg.sender === selfEmail) {
+              className += ' self';
+            } else {
+              className += ' other';
+              const colorIdx = getColorIndex(msg.sender, selfEmail, senderMap);
+              className += colorIdx >= 0 ? ` color-${colorIdx}` : '';
+            }
+            div.className = className;
+            div.innerHTML = `<span class="sender">${msg.sender}</span><span class="time">${msg.time || ''}</span><br>${msg.text}`;
+            chatMessages.appendChild(div);
+          });
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+    }
+
+    chatSend.onclick = sendMessage;
+    chatInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    function sendMessage() {
+      const user = auth.currentUser;
+      const text = chatInput.value.trim();
+      if (!user || !text) return;
+      db.collection('student_conversation').add({
+        sender: user.displayName || user.email,
+        text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+      });
+      chatInput.value = '';
+    }
+  </script>
+</body>
+</html>
