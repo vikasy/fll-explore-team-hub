@@ -288,6 +288,10 @@
       <h2>Team Roster</h2>
       <div id="roster-container">Loading roster…</div>
     </section>
+    <section id="team-progress">
+      <h2>Team Progress</h2>
+      <div id="team-progress-container">Loading team progress…</div>
+    </section>
     <section id="tasks">
       <h2>Team To‑Dos</h2>
       <div>
@@ -489,6 +493,17 @@
       .catch(() => {
         document.getElementById('roster-container').textContent =
           'Could not load roster.';
+      });
+
+    // --- Team Progress Table ---
+    fetch('csv-files/team_session_schedule.csv')
+      .then((response) => response.text())
+      .then((text) => {
+        const rows = text.trim().split('\n').map((line) => line.split(','));
+        buildTable(rows, 'team-progress-container');
+      })
+      .catch(() => {
+        document.getElementById('team-progress-container').textContent = 'Could not load team progress.';
       });
 
     // --- Financials Table ---
