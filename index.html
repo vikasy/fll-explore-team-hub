@@ -5,6 +5,7 @@
   <!-- Firebase SDKs: MUST be first in <head> -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
   <script>
     // Firestore-based allowlist: check if user email is allowed in Firestore
@@ -315,6 +316,10 @@
     <section id="log-out">
         <button id="logout-btn" style="display:none;">Logout</button>
     </section>
+    <footer id="admin-footer" style="display:block;text-align:center;margin-top:1rem;color:#555;">
+      <span>Questions or issues? </span>
+      <a id="admin-mailto" href="#" style="color:var(--primary-color);text-decoration:underline;">Contact Admin</a>
+    </footer>
   </div>
   </main>
   </div>
@@ -555,6 +560,8 @@
 
     // --- Server-based To-Do List Implementation ---
   const API_URL = 'https://us-central1-fllex2wv.cloudfunctions.net/api/tasks';
+  // Admin email to receive access requests (set this to your address)
+  const ADMIN_EMAIL = 'fll2025.westvalley.cusdk8@gmail.com';
 
   window.addEventListener('DOMContentLoaded', () => {
     console.log('[App] DOMContentLoaded');
@@ -564,6 +571,10 @@
     const loginBtn = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const userInfo = document.getElementById('user-info');
+    const adminMailto = document.getElementById('admin-mailto');
+    if (adminMailto && ADMIN_EMAIL) {
+      adminMailto.href = 'mailto:' + ADMIN_EMAIL + '?subject=' + encodeURIComponent('FLL Explore Hub Support');
+    }
 
     // Only Google login is enabled
     if (!window.firebase || !window.firebase.auth) {
@@ -598,9 +609,12 @@
   errorDiv.style.margin = '1.5rem auto 0 auto';
   errorDiv.innerHTML = `
     <div style="color:#b00;font-size:1.2rem;font-weight:bold;margin-bottom:1rem;">Access Denied</div>
-    <div style="margin-bottom:1rem;">Your email is not authorized to access this site.</div>
-    <button id="contact-admin-btn" style="padding:0.5rem 1.5rem;background:#0052a3;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:1rem;">Contact Admin</button>
-    <div id="admin-confirm" style="display:none;margin-top:1rem;color:#0052a3;font-weight:bold;">Admin has been contacted. Bye.</div>
+    <div style="margin-bottom:0.75rem;">Your email is not authorized to access this site.</div>
+    <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:0.5rem;">
+      <button id="contact-admin-btn" style="padding:0.5rem 1.0rem;background:#0052a3;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:0.95rem;">Contact Admin</button>
+      <button id="request-access-btn" style="padding:0.5rem 1.0rem;background:#0a7;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:0.95rem;">Request Access</button>
+    </div>
+    <div id="admin-confirm" style="display:none;margin-top:0.5rem;color:#0052a3;font-weight:bold;"></div>
   `;
   // Place errorDiv after login section
   if (loginSection && loginSection.parentNode) {
@@ -609,56 +623,56 @@
     document.body.appendChild(errorDiv);
   }
 
-      document.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'contact-admin-btn') {
-          document.getElementById('admin-confirm').style.display = '';
-          setTimeout(() => {
-            document.getElementById('admin-confirm').style.display = 'none';
-          }, 3000);
+      document.addEventListener('click', async function(e) {
+        if (!e.target) return;
+        if (e.target.id === 'contact-admin-btn') {
+          const msg = document.getElementById('admin-confirm');
+          if (ADMIN_EMAIL) {
+            const user = auth.currentUser;
+            const fromEmail = (user && user.email) ? user.email : '';
+            const subject = encodeURIComponent('Access request for FLL Explore hub');
+            const body = encodeURIComponent(`Hello Admin,\n\nUser ${fromEmail || '[unknown user]'} is requesting access to the site.\n\nThanks.`);
+            window.location.href = `mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`;
+            if (msg) {
+              msg.textContent = `Opening email to admin (${ADMIN_EMAIL})…`;
+              msg.style.display = '';
+              setTimeout(() => { msg.style.display = 'none'; }, 3000);
+            }
+          } else {
+            if (msg) {
+              msg.textContent = 'No admin email is configured. Set ADMIN_EMAIL at the top of index.html.';
+              msg.style.display = '';
+              setTimeout(() => { msg.style.display = 'none'; }, 4000);
+            }
+          }
+        } else if (e.target.id === 'request-access-btn') {
+          const user = auth.currentUser;
+          if (!user) {
+            alert('Please sign in first.');
+            return;
+          }
+          try {
+            const emailLower = (user.email || '').toLowerCase();
+            await db.collection('accessRequests').doc(emailLower).set({
+              email: emailLower,
+              uid: user.uid || '',
+              displayName: user.displayName || '',
+              requestedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            const msg = document.getElementById('admin-confirm');
+            if (msg) {
+              msg.textContent = 'Access request sent. The admin will review it soon.';
+              msg.style.display = '';
+              setTimeout(() => { msg.style.display = 'none'; }, 4000);
+            }
+            e.target.disabled = true;
+          } catch (err) {
+            alert('Failed to submit access request: ' + (err && err.message ? err.message : err));
+          }
         }
       });
 
-      auth.onAuthStateChanged(async user => {
-        console.log('[Auth] Auth state changed:', user);
-        if (user) {
-          const email = (user.email || '').toLowerCase();
-          // Check Firestore allowlist: collection 'allowedUsers', doc id = email
-          try {
-            const doc = await db.collection('allowedUsers').doc(email).get();
-            if (!doc.exists) {
-              loginSection.style.display = '';
-              protectedContent.style.display = 'none';
-              logoutBtn.style.display = 'none';
-              userInfo.textContent = '';
-              errorDiv.style.display = '';
-              return;
-            } else {
-              errorDiv.style.display = 'none';
-              loginSection.style.display = 'none';
-              protectedContent.style.display = '';
-              logoutBtn.style.display = '';
-              userInfo.textContent = 'Logged in as: ' + (user.displayName || user.email);
-              // Enable to-do list
-              if (typeof loadTasks === 'function') loadTasks();
-            }
-          } catch (err) {
-            console.error('[Firestore] Error checking allowlist:', err);
-            errorDiv.style.display = '';
-            errorDiv.innerHTML = '<div style="color:#b00;font-size:1.2rem;font-weight:bold;margin-bottom:1rem;">Access Denied</div>' +
-              '<div style="margin-bottom:1rem;">Could not verify your access. Please try again later.</div>';
-            loginSection.style.display = '';
-            protectedContent.style.display = 'none';
-            logoutBtn.style.display = 'none';
-            userInfo.textContent = '';
-          }
-        } else {
-          errorDiv.style.display = 'none';
-          loginSection.style.display = '';
-          protectedContent.style.display = 'none';
-          logoutBtn.style.display = 'none';
-          userInfo.textContent = '';
-        }
-      });
+      // ...existing code...
 
       async function fetchTasks() {
         try {
@@ -774,6 +788,51 @@
 
       // Initialise the task list when the page loads.
       loadTasks();
+
+      // Auth state observer with allowUser check (moved here after loadTasks definition)
+      auth.onAuthStateChanged(async user => {
+        console.log('[Auth] Auth state changed:', user);
+        if (user) {
+          const email = (user.email || '').toLowerCase();
+          // Check Firestore allowlist: collection 'allowedUsers', doc id = email
+          try {
+            const doc = await db.collection('allowedUsers').doc(email).get();
+            console.log('[Firestore] Allowlist doc', doc);
+            console.log('[Firestore] Allowlist check for', email, 'exists:', doc.exists);
+            if (!doc.exists) {
+              loginSection.style.display = '';
+              protectedContent.style.display = 'none';
+              logoutBtn.style.display = 'none';
+              userInfo.textContent = '';
+              errorDiv.style.display = '';
+              return;
+            } else {
+              errorDiv.style.display = 'none';
+              loginSection.style.display = 'none';
+              protectedContent.style.display = '';
+              logoutBtn.style.display = '';
+              userInfo.textContent = 'Logged in as: ' + (user.displayName || user.email);
+              // Enable to-do list
+              if (typeof loadTasks === 'function') loadTasks();
+            }
+          } catch (err) {
+            console.error('[Firestore] Error checking allowlist:', err);
+            errorDiv.style.display = '';
+            errorDiv.innerHTML = '<div style="color:#b00;font-size:1.2rem;font-weight:bold;margin-bottom:1rem;">Access Denied</div>' +
+              '<div style="margin-bottom:1rem;">Could not verify your access. Please try again later.</div>';
+            loginSection.style.display = '';
+            protectedContent.style.display = 'none';
+            logoutBtn.style.display = 'none';
+            userInfo.textContent = '';
+          }
+        } else {
+          errorDiv.style.display = 'none';
+          loginSection.style.display = '';
+          protectedContent.style.display = 'none';
+          logoutBtn.style.display = 'none';
+          userInfo.textContent = '';
+        }
+      });
 
       // The media section now links to a private Google Drive folder rather than using
       // client-side password protection. No additional script is required here.

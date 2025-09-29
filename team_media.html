@@ -66,6 +66,10 @@
     </template>
   </main>
   </div>
+  <footer id="admin-footer" style="display:none;text-align:center;margin:0.75rem 0;color:#555;">
+    <span>Questions or issues? </span>
+    <a id="admin-mailto" href="#" style="color:#0052a3;text-decoration:underline;">Contact Admin</a>
+  </footer>
   <style>
     .back-main-btn {
       display: block;
@@ -111,6 +115,7 @@
       'vikasy@gmail.com',
       'yadavnaom@gmail.com'
     ];
+  const ADMIN_EMAIL = 'fll2025.westvalley.cusdk8@gmail.com';
     // Firebase config (copy from index.html)
     // Your web app's Firebase configuration
     // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -132,6 +137,11 @@
     console.log('[DEBUG] storage:', storage);
     console.log('[DEBUG] db:', db);
     const mediaGrid = document.getElementById('media-grid');
+    const adminFooter = document.getElementById('admin-footer');
+    const adminMailto = document.getElementById('admin-mailto');
+    if (adminMailto && ADMIN_EMAIL) {
+      adminMailto.href = 'mailto:' + ADMIN_EMAIL + '?subject=' + encodeURIComponent('FLL Explore Hub - Media Support');
+    }
     const mediaUploadDiv = document.getElementById('media-upload');
     const mediaFileInput = document.getElementById('media-file');
     const mediaUploadBtn = document.getElementById('media-upload-btn');
@@ -409,8 +419,10 @@
       });
     }
     firebase.auth().onAuthStateChanged(user => {
-      showMediaUploadUI(user && allowUser.includes((user.email || '').toLowerCase()));
-      if (user) loadMedia();
+      const isAllowed = user && allowUser.includes((user.email || '').toLowerCase());
+      showMediaUploadUI(!!isAllowed);
+      if (adminFooter) adminFooter.style.display = isAllowed ? '' : 'none';
+      if (user && isAllowed) loadMedia();
       else {
         mediaGrid.innerHTML = '';
         mediaEmptyMsg.style.display = 'none';

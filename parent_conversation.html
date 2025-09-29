@@ -176,7 +176,12 @@
       </div>
     </div>
   </div>
+  <footer id="admin-footer" style="display:none;text-align:center;margin:0.75rem 0;color:#555;">
+    <span>Questions or issues? </span>
+    <a id="admin-mailto" href="#" style="color:#0052a3;text-decoration:underline;">Contact Admin</a>
+  </footer>
   <script>
+    const ADMIN_EMAIL = 'fll2025.westvalley.cusdk8@gmail.com';
     // Allowlist of parent emails (from fll_parents_list.csv)
     const allowUser = [
       'samirbaid@gmail.com',
@@ -201,8 +206,13 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    const loginSection = document.getElementById('login-section');
+  const loginSection = document.getElementById('login-section');
     const chatSection = document.getElementById('chat-section');
+    const adminFooter = document.getElementById('admin-footer');
+    const adminMailto = document.getElementById('admin-mailto');
+    if (adminMailto && ADMIN_EMAIL) {
+      adminMailto.href = 'mailto:' + ADMIN_EMAIL + '?subject=' + encodeURIComponent('FLL Explore Hub - Parent Conversation Support');
+    }
     const loginBtn = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const userInfo = document.getElementById('user-info');
@@ -233,10 +243,11 @@
           if (unsubscribe) unsubscribe();
           return;
         }
-        loginSection.style.display = 'none';
+  loginSection.style.display = 'none';
         chatSection.style.display = '';
         logoutBtn.style.display = '';
         userInfo.textContent = user.displayName || user.email;
+  if (adminFooter) adminFooter.style.display = '';
         // Load opt-in status with error handling
         try {
           const doc = await db.collection('parent_nightly_optin').doc(user.uid).get();
@@ -260,10 +271,11 @@
         };
         loadMessages();
       } else {
-        loginSection.style.display = '';
+  loginSection.style.display = '';
         chatSection.style.display = 'none';
         logoutBtn.style.display = 'none';
         userInfo.textContent = '';
+  if (adminFooter) adminFooter.style.display = 'none';
         nightlySummaryCheckbox.checked = false;
         nightlySummaryCheckbox.disabled = true;
         if (unsubscribe) unsubscribe();
