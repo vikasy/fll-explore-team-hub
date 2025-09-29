@@ -7,18 +7,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
   <script>
-    // Allowlist of parent emails (from fll_parents_list.csv)
-    const allowUser = [
-      'samirbaid@gmail.com',
-      'dedhia.krina@gmail.com',
-      'juididolkr@gmail.com',
-      'namitachitre85@gmail.com',
-      'vikasy@gmail.com',
-      'yadavnaom@gmail.com',
-      'fll2025.westvalley.cusdk8@gmail.com'
-    ];
+    // Firestore-based allowlist: check if user email is allowed in Firestore
 
-    // Your web app's Firebase configuration
+  // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
       authDomain: "fllex2wv.firebaseapp.com",
@@ -32,6 +23,8 @@
     if (firebase.analytics) {
       firebase.analytics();
     }
+    // Initialize Firestore
+    const db = firebase.firestore();
     console.log('[Firebase] Initialized');
   </script>
   <!-- ReCAPTCHA (commented out)
@@ -563,40 +556,40 @@
     // --- Server-based To-Do List Implementation ---
   const API_URL = 'https://us-central1-fllex2wv.cloudfunctions.net/api/tasks';
 
-    window.addEventListener('DOMContentLoaded', () => {
-      console.log('[App] DOMContentLoaded');
-      // Hide protected content until login
-      const protectedContent = document.getElementById('protected-content');
-      const loginSection = document.getElementById('login-section');
-      const loginBtn = document.getElementById('login-btn');
-      const logoutBtn = document.getElementById('logout-btn');
-      const userInfo = document.getElementById('user-info');
+  window.addEventListener('DOMContentLoaded', () => {
+    console.log('[App] DOMContentLoaded');
+    // Hide protected content until login
+    const protectedContent = document.getElementById('protected-content');
+    const loginSection = document.getElementById('login-section');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userInfo = document.getElementById('user-info');
 
-      // Only Google login is enabled
-      if (!window.firebase || !window.firebase.auth) {
-        console.error('[Firebase] SDK not loaded!');
-        return;
-      }
-      const auth = firebase.auth();
-      console.log('[Firebase] Auth initialized');
+    // Only Google login is enabled
+    if (!window.firebase || !window.firebase.auth) {
+      console.error('[Firebase] SDK not loaded!');
+      return;
+    }
+    const auth = firebase.auth();
+    console.log('[Firebase] Auth initialized');
 
-      loginBtn.onclick = () => {
-        console.log('[Auth] Login button clicked');
-        // Google sign-in
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(err => {
-          alert('Login failed: ' + err.message);
-          console.error('[Auth] Login failed:', err);
-        });
-      };
-      logoutBtn.onclick = () => {
-        console.log('[Auth] Logout button clicked');
-        auth.signOut();
-      };
+    loginBtn.onclick = () => {
+      console.log('[Auth] Login button clicked');
+      // Google sign-in
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => {
+        alert('Login failed: ' + err.message);
+        console.error('[Auth] Login failed:', err);
+      });
+    };
+    logoutBtn.onclick = () => {
+      console.log('[Auth] Logout button clicked');
+      auth.signOut();
+    };
 
   // Email login code removed for now (Google login only)
 
-      // Auth state observer with allowUser check
+  // Auth state observer with allowUser check
   // Insert access denied message below login section (email login form removed)
   const errorDiv = document.createElement('div');
   errorDiv.id = 'access-denied';
@@ -625,25 +618,38 @@
         }
       });
 
-      auth.onAuthStateChanged(user => {
+      auth.onAuthStateChanged(async user => {
         console.log('[Auth] Auth state changed:', user);
         if (user) {
           const email = (user.email || '').toLowerCase();
-          if (!allowUser.includes(email)) {
+          // Check Firestore allowlist: collection 'allowedUsers', doc id = email
+          try {
+            const doc = await db.collection('allowedUsers').doc(email).get();
+            if (!doc.exists) {
+              loginSection.style.display = '';
+              protectedContent.style.display = 'none';
+              logoutBtn.style.display = 'none';
+              userInfo.textContent = '';
+              errorDiv.style.display = '';
+              return;
+            } else {
+              errorDiv.style.display = 'none';
+              loginSection.style.display = 'none';
+              protectedContent.style.display = '';
+              logoutBtn.style.display = '';
+              userInfo.textContent = 'Logged in as: ' + (user.displayName || user.email);
+              // Enable to-do list
+              if (typeof loadTasks === 'function') loadTasks();
+            }
+          } catch (err) {
+            console.error('[Firestore] Error checking allowlist:', err);
+            errorDiv.style.display = '';
+            errorDiv.innerHTML = '<div style="color:#b00;font-size:1.2rem;font-weight:bold;margin-bottom:1rem;">Access Denied</div>' +
+              '<div style="margin-bottom:1rem;">Could not verify your access. Please try again later.</div>';
             loginSection.style.display = '';
             protectedContent.style.display = 'none';
             logoutBtn.style.display = 'none';
             userInfo.textContent = '';
-            errorDiv.style.display = '';
-            return;
-          } else {
-            errorDiv.style.display = 'none';
-            loginSection.style.display = 'none';
-            protectedContent.style.display = '';
-            logoutBtn.style.display = '';
-            userInfo.textContent = 'Logged in as: ' + (user.displayName || user.email);
-            // Enable to-do list
-            if (typeof loadTasks === 'function') loadTasks();
           }
         } else {
           errorDiv.style.display = 'none';
