@@ -151,7 +151,7 @@
       const isVideo = file.type.startsWith('video');
       // Video: warn and offer to compress if over 20MB
       if (isVideo && file.size > 20 * 1024 * 1024) {
-  console.log('[DEBUG] Video is over 20MB, attempting to load ffmpeg.wasm');
+        console.log('[DEBUG] Video is over 20MB, attempting to load ffmpeg.wasm');
         if (!window.ffmpegLoaded) {
           mediaUploadStatus.textContent = 'Loading video compression tools (first time may take 30+ seconds)...';
           // Dynamically load ffmpeg.wasm
