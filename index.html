@@ -496,44 +496,179 @@
           'Could not load roster.';
       });
 
-    // --- Team Progress Table ---
-    // Normalize dates in the first column to YYYY-MM-DD, assuming current season year when missing.
-    fetch('csv-files/team_session_schedule.csv')
-      .then((response) => response.text())
-      .then((text) => {
-        const SEASON_YEAR = new Date().getFullYear(); // adjust if you want a fixed season (e.g., 2025)
-        const normalizeDate = (s) => {
-          if (!s) return s;
-          const str = String(s).trim();
-          // Already ISO-like
-          if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(str)) return str;
-          // MM/DD or MM/DD/YY or MM/DD/YYYY (handle stray inputs like 09/28/202)
-          const m = str.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
-          if (!m) return str; // leave as-is if unrecognized
-          const mm = String(m[1]).padStart(2, '0');
-          const dd = String(m[2]).padStart(2, '0');
-          let yyyy = m[3];
-          if (!yyyy || yyyy.length < 2) {
-            yyyy = SEASON_YEAR;
-          } else if (yyyy.length === 2) {
-            yyyy = 2000 + Number(yyyy);
-          } else if (yyyy.length !== 4) {
-            yyyy = SEASON_YEAR;
-          }
-          return `${yyyy}-${mm}-${dd}`;
-        };
-        const rows = text.trim().split('\n').map((line) => line.split(','));
-        if (rows.length > 1) {
-          // Normalize the first column header name if needed
-          const header = rows[0];
-          // Normalize date values in first column for all data rows
-          for (let i = 1; i < rows.length; i++) {
-            if (rows[i] && rows[i][0] != null) {
-              rows[i][0] = normalizeDate(rows[i][0]);
+    // --- Team Progress Table (Activity checklist) ---
+    // Robust CSV parser that supports quoted fields and newlines within quotes.
+    function parseCSVWithQuotes(text) {
+      const rows = [];
+      let row = [];
+      let field = '';
+      let i = 0;
+      let inQuotes = false;
+      while (i < text.length) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"') {
+            if (i + 1 < text.length && text[i + 1] === '"') {
+              field += '"';
+              i += 2;
+              continue;
+            } else {
+              inQuotes = false;
+              i++;
+              continue;
             }
+          } else {
+            field += c;
+            i++;
+            continue;
+          }
+        } else {
+          if (c === '"') {
+            inQuotes = true;
+            i++;
+            continue;
+          }
+          if (c === ',') {
+            row.push(field);
+            field = '';
+            i++;
+            continue;
+          }
+          if (c === '\n') {
+            row.push(field);
+            rows.push(row);
+            row = [];
+            field = '';
+            i++;
+            continue;
+          }
+          if (c === '\r') { i++; continue; }
+          field += c;
+          i++;
+        }
+      }
+      // push trailing field/row
+      if (field.length > 0 || row.length > 0) {
+        row.push(field);
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    function getScheduleProgress() {
+      try {
+        const raw = localStorage.getItem('schedule_progress');
+        return raw ? JSON.parse(raw) : {};
+      } catch { return {}; }
+    }
+    function saveScheduleProgress(p) {
+      try { localStorage.setItem('schedule_progress', JSON.stringify(p)); } catch {}
+    }
+
+    function renderTeamProgress(rows) {
+      if (!rows || rows.length === 0) return;
+      const container = document.getElementById('team-progress-container');
+      const headers = rows[0];
+      const activityIdx = headers.findIndex(h => (h || '').trim().toLowerCase() === 'activity');
+      const sessionIdx = headers.findIndex(h => (h || '').trim().toLowerCase() === 'session #');
+      const dateIdx = headers.findIndex(h => (h || '').trim().toLowerCase() === 'hosting date');
+
+      // Normalize hosting date column to YYYY-MM-DD
+      const SEASON_YEAR = new Date().getFullYear();
+      const normalizeDate = (s) => {
+        if (!s) return s;
+        const str = String(s).trim();
+        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(str)) return str;
+        const m = str.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+        if (!m) return str;
+        const mm = String(m[1]).padStart(2, '0');
+        const dd = String(m[2]).padStart(2, '0');
+        let yyyy = m[3];
+        if (!yyyy || yyyy.length < 2) {
+          yyyy = SEASON_YEAR;
+        } else if (yyyy.length === 2) {
+          yyyy = 2000 + Number(yyyy);
+        } else if (yyyy.length !== 4) {
+          yyyy = SEASON_YEAR;
+        }
+        return `${yyyy}-${mm}-${dd}`;
+      };
+      if (dateIdx >= 0) {
+        for (let i = 1; i < rows.length; i++) {
+          if (rows[i] && rows[i][dateIdx] != null) {
+            rows[i][dateIdx] = normalizeDate(rows[i][dateIdx]);
           }
         }
-        buildTable(rows, 'team-progress-container');
+      }
+
+      // Build table with Activity as a checklist
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      headers.forEach(h => { const th = document.createElement('th'); th.textContent = h; headerRow.appendChild(th); });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      const progress = getScheduleProgress();
+      for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        if (!r || r.every(c => String(c||'').trim() === '')) continue;
+        const tr = document.createElement('tr');
+        for (let c = 0; c < headers.length; c++) {
+          const td = document.createElement('td');
+          if (c === activityIdx) {
+            const sessionLabel = sessionIdx >= 0 ? r[sessionIdx] : `Row${i}`;
+            const key = sessionLabel || `Row${i}`;
+            const saved = Array.isArray(progress[key]) ? progress[key] : [];
+            const items = String(r[c] || '')
+              .split('\n')
+              .map(s => s.trim())
+              .filter(s => s.length > 0);
+            const ul = document.createElement('ul');
+            ul.style.listStyle = 'none';
+            ul.style.paddingLeft = '0';
+            items.forEach((text, idx) => {
+              const li = document.createElement('li');
+              li.style.marginBottom = '0.25rem';
+              const label = document.createElement('label');
+              label.style.display = 'flex';
+              label.style.alignItems = 'flex-start';
+              const cb = document.createElement('input');
+              cb.type = 'checkbox';
+              cb.checked = Boolean(saved[idx]);
+              cb.style.marginRight = '0.5rem';
+              cb.addEventListener('change', () => {
+                const p = getScheduleProgress();
+                const arr = Array.isArray(p[key]) ? p[key] : [];
+                arr[idx] = cb.checked;
+                p[key] = arr;
+                saveScheduleProgress(p);
+              });
+              const span = document.createElement('span');
+              span.textContent = text;
+              label.appendChild(cb);
+              label.appendChild(span);
+              li.appendChild(label);
+              ul.appendChild(li);
+            });
+            td.appendChild(ul);
+          } else {
+            td.textContent = r[c] || '';
+          }
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+      container.innerHTML = '';
+      container.appendChild(table);
+    }
+
+    fetch('csv-files/team_session_schedule.csv')
+      .then(r => r.text())
+      .then(text => {
+        const rows = parseCSVWithQuotes(text.trim());
+        renderTeamProgress(rows);
       })
       .catch(() => {
         document.getElementById('team-progress-container').textContent = 'Could not load team progress.';
