@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    // Returns the authenticated user's email (may be null on some providers)
+    function authEmail() {
+      return request.auth != null && request.auth.token.email != null
+        ? request.auth.token.email
+        : '';
+    }
+
+    // Allowlist check: a user is allowed if a document exists in 'allowedUsers'
+    // with ID equal to either their email or their UID.
+    // NOTE: Ensure the doc ID matches the exact email string Firebase provides
+    // (usually lowercase for Google accounts) OR add a doc keyed by auth.uid.
+    function isAllowedUser() {
+      return exists(/databases/$(database)/documents/allowedUsers/$(authEmail())) ||
+             exists(/databases/$(database)/documents/allowedUsers/$(request.auth.uid));
+    }
+
+    // Team-shared progress for session checklist
+    match /scheduleProgress/{sessionId} {
+      allow read: if isAuthed() && isAllowedUser();
+      allow write: if isAuthed() && isAllowedUser()
+                   && request.resource.data.keys().hasOnly(['items', 'updatedAt', 'updatedBy'])
+                   && (request.resource.data.items is list)
+                   && request.resource.data.items.size() <= 200
+                   && request.resource.data.items.every(item, idx => item is bool);
+    }
+  }
+}
