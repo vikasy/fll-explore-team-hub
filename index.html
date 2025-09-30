@@ -565,6 +565,13 @@
       try { localStorage.setItem('schedule_progress', JSON.stringify(p)); } catch {}
     }
 
+    // Firestore helpers for team-shared progress (per session)
+    function scheduleDocRef(sessionLabel) {
+      if (!window.db || !sessionLabel) return null;
+      const key = String(sessionLabel).trim();
+      return db.collection('scheduleProgress').doc(key);
+    }
+
     function renderTeamProgress(rows) {
       if (!rows || rows.length === 0) return;
       const container = document.getElementById('team-progress-container');
@@ -610,6 +617,8 @@
       table.appendChild(thead);
       const tbody = document.createElement('tbody');
       const progress = getScheduleProgress();
+      const rowCheckboxMap = new Map(); // sessionLabel -> [checkboxes]
+      const unsubscribeMap = new Map(); // sessionLabel -> unsubscribe fn
       for (let i = 1; i < rows.length; i++) {
         const r = rows[i];
         if (!r || r.every(c => String(c||'').trim() === '')) continue;
@@ -627,6 +636,7 @@
             const ul = document.createElement('ul');
             ul.style.listStyle = 'none';
             ul.style.paddingLeft = '0';
+            const cbArray = [];
             items.forEach((text, idx) => {
               const li = document.createElement('li');
               li.style.marginBottom = '0.25rem';
@@ -637,12 +647,25 @@
               cb.type = 'checkbox';
               cb.checked = Boolean(saved[idx]);
               cb.style.marginRight = '0.5rem';
-              cb.addEventListener('change', () => {
+              cb.addEventListener('change', async () => {
+                // Update localStorage for offline fallback
                 const p = getScheduleProgress();
                 const arr = Array.isArray(p[key]) ? p[key] : [];
                 arr[idx] = cb.checked;
                 p[key] = arr;
                 saveScheduleProgress(p);
+                // Sync to Firestore (team-shared)
+                try {
+                  const ref = scheduleDocRef(key);
+                  if (ref) {
+                    // Ensure array length matches items length
+                    const toSave = new Array(items.length).fill(false).map((_, j) => (j === idx ? cb.checked : Boolean(saved[j] || arr[j])));
+                    const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+                    await ref.set({ items: toSave, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: user && user.email ? user.email : null }, { merge: true });
+                  }
+                } catch (e) {
+                  console.warn('Firestore sync failed; retained local-only progress.', e);
+                }
               });
               const span = document.createElement('span');
               span.textContent = text;
@@ -650,8 +673,36 @@
               label.appendChild(span);
               li.appendChild(label);
               ul.appendChild(li);
+              cbArray.push(cb);
             });
             td.appendChild(ul);
+            rowCheckboxMap.set(key, { cbs: cbArray, count: items.length });
+            // Live updates from Firestore
+            try {
+              const ref = scheduleDocRef(key);
+              if (ref) {
+                const unsub = ref.onSnapshot((snap) => {
+                  const data = snap.exists ? snap.data() : null;
+                  const itemsState = Array.isArray(data && data.items) ? data.items : null;
+                  if (!itemsState) return; // nothing to apply
+                  const entry = rowCheckboxMap.get(key);
+                  if (!entry || !Array.isArray(entry.cbs)) return;
+                  for (let j = 0; j < entry.cbs.length; j++) {
+                    const desired = Boolean(itemsState[j]);
+                    if (entry.cbs[j].checked !== desired) {
+                      entry.cbs[j].checked = desired;
+                    }
+                  }
+                  // Mirror to localStorage for faster loads/offline
+                  const p = getScheduleProgress();
+                  p[key] = itemsState;
+                  saveScheduleProgress(p);
+                });
+                unsubscribeMap.set(key, unsub);
+              }
+            } catch (e) {
+              console.warn('Could not attach Firestore listener for session', key, e);
+            }
           } else {
             td.textContent = r[c] || '';
           }
