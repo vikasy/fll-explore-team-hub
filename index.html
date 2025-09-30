@@ -497,10 +497,42 @@
       });
 
     // --- Team Progress Table ---
+    // Normalize dates in the first column to YYYY-MM-DD, assuming current season year when missing.
     fetch('csv-files/team_session_schedule.csv')
       .then((response) => response.text())
       .then((text) => {
+        const SEASON_YEAR = new Date().getFullYear(); // adjust if you want a fixed season (e.g., 2025)
+        const normalizeDate = (s) => {
+          if (!s) return s;
+          const str = String(s).trim();
+          // Already ISO-like
+          if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(str)) return str;
+          // MM/DD or MM/DD/YY or MM/DD/YYYY (handle stray inputs like 09/28/202)
+          const m = str.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+          if (!m) return str; // leave as-is if unrecognized
+          const mm = String(m[1]).padStart(2, '0');
+          const dd = String(m[2]).padStart(2, '0');
+          let yyyy = m[3];
+          if (!yyyy || yyyy.length < 2) {
+            yyyy = SEASON_YEAR;
+          } else if (yyyy.length === 2) {
+            yyyy = 2000 + Number(yyyy);
+          } else if (yyyy.length !== 4) {
+            yyyy = SEASON_YEAR;
+          }
+          return `${yyyy}-${mm}-${dd}`;
+        };
         const rows = text.trim().split('\n').map((line) => line.split(','));
+        if (rows.length > 1) {
+          // Normalize the first column header name if needed
+          const header = rows[0];
+          // Normalize date values in first column for all data rows
+          for (let i = 1; i < rows.length; i++) {
+            if (rows[i] && rows[i][0] != null) {
+              rows[i][0] = normalizeDate(rows[i][0]);
+            }
+          }
+        }
         buildTable(rows, 'team-progress-container');
       })
       .catch(() => {
