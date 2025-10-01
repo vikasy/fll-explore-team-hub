@@ -272,6 +272,7 @@
     </div>
     -->
   </section>
+  
   <!-- Protected Section -->
   <div id="protected-content" style="display:none;">
     <section id="timeline">
@@ -294,6 +295,7 @@
       <div style="margin-bottom:0.5rem;color:#444;font-size:1rem;">
         <strong>Note:</strong> All sessions start at <b>1:30 PM</b> on Sunday and last 60–80 minutes.
       </div>
+      <div id="schedule-status" style="display:none;margin:0.5rem 0;padding:0.5rem 0.75rem;border-radius:6px;background:#fff3cd;color:#856404;border:1px solid #ffeeba;"></div>
       <div id="team-progress-container">Loading team progress…</div>
     </section>
     <section id="tasks">
@@ -349,6 +351,9 @@
   
   <script>
     // --- BEGIN: Your main app code ---
+    // Global flags for gating Firestore usage
+    window.__allowlist_ok = false;
+    window.__teamProgressRows = null;
     function buildTable(rows, containerId) {
       if (!rows || rows.length === 0) return;
       const container = document.getElementById(containerId);
@@ -574,9 +579,30 @@
 
     // Firestore helpers for team-shared progress (per session)
     function scheduleDocRef(sessionLabel) {
-      if (!window.db || !sessionLabel) return null;
+      // Use the global Firestore instance. Top-level const db is not on window,
+      // so don't check window.db here.
+      const fdb = (typeof db !== 'undefined' && db)
+        ? db
+        : (typeof firebase !== 'undefined' && firebase.firestore ? firebase.firestore() : null);
+      if (!fdb || !sessionLabel) return null;
       const key = String(sessionLabel).trim();
-      return db.collection('scheduleProgress').doc(key);
+      return fdb.collection('scheduleProgress').doc(key);
+    }
+
+    function setScheduleStatus(msg, type) {
+      const el = document.getElementById('schedule-status');
+      if (!el) return;
+      // Errors-only mode: show banner only for errors; otherwise hide/clear.
+      if (type !== 'error' || !msg) {
+        el.style.display = 'none';
+        el.textContent = '';
+        return;
+      }
+      el.textContent = msg;
+      el.style.background = '#f8d7da';
+      el.style.color = '#721c24';
+      el.style.borderColor = '#f5c6cb';
+      el.style.display = '';
     }
 
     function renderTeamProgress(rows) {
@@ -703,13 +729,25 @@
                 try {
                   const ref = scheduleDocRef(key);
                   if (ref) {
-                    // Ensure array length matches items length
-                    const toSave = new Array(items.length).fill(false).map((_, j) => (j === idx ? cb.checked : Boolean(saved[j] || arr[j])));
+                    // Build the next state from the current UI checkboxes to avoid resetting other items
+                    const entry = rowCheckboxMap.get(key);
+                    const toSave = (entry && Array.isArray(entry.cbs))
+                      ? entry.cbs.map(el => !!el.checked)
+                      : Array.from({ length: items.length }, (_, j) => (j === idx ? !!cb.checked : !!arr[j]));
                     const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
                     await ref.set({ items: toSave, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: user && user.email ? user.email : null }, { merge: true });
+                    // Mirror latest state to localStorage
+                    const p2 = getScheduleProgress();
+                    p2[key] = toSave;
+                    saveScheduleProgress(p2);
+                  } else {
+                    setScheduleStatus('Cloud save skipped: database not initialized.', 'error');
                   }
                 } catch (e) {
                   console.warn('Firestore sync failed; retained local-only progress.', e);
+                  const msg = (e && e.message) ? e.message : String(e);
+                  const hint = 'If you\'re signed in, ask the admin to add an allowedUsers doc with your EXACT email (case-sensitive) or your UID, and ensure Firestore rules are deployed.';
+                  setScheduleStatus('Cloud save failed: ' + msg + ' — ' + hint, 'error');
                 }
               });
               const span = document.createElement('span');
@@ -742,11 +780,18 @@
                   const p = getScheduleProgress();
                   p[key] = itemsState;
                   saveScheduleProgress(p);
+                }, (err) => {
+                  console.warn('Firestore listener error for session', key, err);
+                  setScheduleStatus('Cloud sync listener error: ' + (err && err.message ? err.message : err), 'error');
                 });
                 unsubscribeMap.set(key, unsub);
+              } else {
+                // DB not ready — surface a gentle info message once during render
+                setScheduleStatus('Cloud sync not connected (database not initialized).', 'info');
               }
             } catch (e) {
               console.warn('Could not attach Firestore listener for session', key, e);
+              setScheduleStatus('Could not start cloud sync: ' + (e && e.message ? e.message : e), 'error');
             }
           } else {
             td.textContent = r[c] || '';
@@ -764,11 +809,19 @@
       .then(r => r.text())
       .then(text => {
         const rows = parseCSVWithQuotes(text.trim());
-        renderTeamProgress(rows);
+        window.__teamProgressRows = rows;
+        // Only render if allowlist already passed; otherwise wait for auth flow
+        if (window.__allowlist_ok) {
+          renderTeamProgress(rows);
+        } else {
+          setScheduleStatus('Sign in to enable cloud sync for Team Progress…', 'info');
+        }
       })
       .catch(() => {
         document.getElementById('team-progress-container').textContent = 'Could not load team progress.';
       });
+
+    // Seed helper removed per request; checklist docs will be created on first checkbox toggle.
 
     // --- Financials Table ---
     fetch('csv-files/fll_financials_list.csv')
@@ -1052,22 +1105,29 @@
       // Initialise the task list when the page loads.
       loadTasks();
 
-      // Auth state observer with allowUser check (moved here after loadTasks definition)
+      // Auth state observer with allowUser check and gated rendering
       auth.onAuthStateChanged(async user => {
         console.log('[Auth] Auth state changed:', user);
         if (user) {
-          const email = (user.email || '').toLowerCase();
+          const emailExact = user.email || '';
+          const uid = user.uid || '';
+          
           // Check Firestore allowlist: collection 'allowedUsers', doc id = email
           try {
-            const doc = await db.collection('allowedUsers').doc(email).get();
-            console.log('[Firestore] Allowlist doc', doc);
-            console.log('[Firestore] Allowlist check for', email, 'exists:', doc.exists);
-            if (!doc.exists) {
+            const col = db.collection('allowedUsers');
+            const [docByEmailExact, docByUid] = await Promise.all([
+              emailExact ? col.doc(emailExact).get() : Promise.resolve({ exists: false }),
+              uid ? col.doc(uid).get() : Promise.resolve({ exists: false })
+            ]);
+            const allowed = !!(docByEmailExact && docByEmailExact.exists) || !!(docByUid && docByUid.exists);
+            console.log('[Firestore] Allowlist check for exact email', emailExact, 'or uid', uid, 'allowed:', allowed);
+            if (!allowed) {
               loginSection.style.display = '';
               protectedContent.style.display = 'none';
               logoutBtn.style.display = 'none';
               userInfo.textContent = '';
               errorDiv.style.display = '';
+              window.__allowlist_ok = false;
               return;
             } else {
               errorDiv.style.display = 'none';
@@ -1075,6 +1135,13 @@
               protectedContent.style.display = '';
               logoutBtn.style.display = '';
               userInfo.textContent = 'Logged in as: ' + (user.displayName || user.email);
+              window.__allowlist_ok = true;
+              // If team progress CSV is already loaded but not rendered, render now
+              if (window.__teamProgressRows && !window.__teamProgressRendered) {
+                //setScheduleStatus('', 'info');
+                renderTeamProgress(window.__teamProgressRows);
+                window.__teamProgressRendered = true;
+              }
               // Enable to-do list
               if (typeof loadTasks === 'function') loadTasks();
             }
@@ -1087,6 +1154,7 @@
             protectedContent.style.display = 'none';
             logoutBtn.style.display = 'none';
             userInfo.textContent = '';
+            window.__allowlist_ok = false;
           }
         } else {
           errorDiv.style.display = 'none';
@@ -1094,8 +1162,11 @@
           protectedContent.style.display = 'none';
           logoutBtn.style.display = 'none';
           userInfo.textContent = '';
+          window.__allowlist_ok = false;
+          
         }
       });
+      
 
       // The media section now links to a private Google Drive folder rather than using
       // client-side password protection. No additional script is required here.

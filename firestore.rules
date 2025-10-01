@@ -21,14 +21,19 @@ service cloud.firestore {
              exists(/databases/$(database)/documents/allowedUsers/$(request.auth.uid));
     }
 
+    // Allowlist collection: let a signed-in user create/read their own doc by exact email or UID
+    match /allowedUsers/{id} {
+      allow read: if isAuthed() && (id == authEmail() || id == request.auth.uid);
+      allow write: if isAuthed() && (id == authEmail() || id == request.auth.uid);
+    }
+
     // Team-shared progress for session checklist
     match /scheduleProgress/{sessionId} {
       allow read: if isAuthed() && isAllowedUser();
       allow write: if isAuthed() && isAllowedUser()
                    && request.resource.data.keys().hasOnly(['items', 'updatedAt', 'updatedBy'])
                    && (request.resource.data.items is list)
-                   && request.resource.data.items.size() <= 200
-                   && request.resource.data.items.every(item, idx => item is bool);
+                   && request.resource.data.items.size() <= 200;
     }
   }
 }
