@@ -131,19 +131,44 @@
     logoutBtn.onclick = () => auth.signOut();
 
     async function fetchAllowedUserDoc(user) {
-      const emailKey = (user.email || '').toLowerCase();
+      const rawEmail = (user.email || '');
+      const lowerEmail = rawEmail.toLowerCase();
+      const tried = [];
       try {
-        // Try email doc first
-        const emailDocRef = db.collection('allowedUsers').doc(emailKey);
-        const emailSnap = await emailDocRef.get();
-        if (emailSnap.exists) return emailSnap;
-        // Fallback to UID doc
-        const uidDocRef = db.collection('allowedUsers').doc(user.uid);
-        const uidSnap = await uidDocRef.get();
-        if (uidSnap.exists) return uidSnap;
+        // 1. Try exact-case email doc (in case existing docs were created with original casing)
+        if (rawEmail) {
+          const exactRef = db.collection('allowedUsers').doc(rawEmail);
+            tried.push(rawEmail);
+          const exactSnap = await exactRef.get();
+          if (exactSnap.exists) {
+            console.log('[allowedUsers] Found exact-case email doc:', rawEmail);
+            return exactSnap;
+          }
+        }
+        // 2. Try lowercase email doc (new convention)
+        if (lowerEmail && lowerEmail !== rawEmail) {
+          const lowerRef = db.collection('allowedUsers').doc(lowerEmail);
+            tried.push(lowerEmail);
+          const lowerSnap = await lowerRef.get();
+          if (lowerSnap.exists) {
+            console.log('[allowedUsers] Found lowercase email doc:', lowerEmail);
+            return lowerSnap;
+          }
+        }
+        // 3. Try UID doc
+        if (user.uid) {
+          const uidRef = db.collection('allowedUsers').doc(user.uid);
+            tried.push(user.uid);
+          const uidSnap = await uidRef.get();
+          if (uidSnap.exists) {
+            console.log('[allowedUsers] Found UID doc:', user.uid);
+            return uidSnap;
+          }
+        }
       } catch (e) {
         console.error('Error fetching allowedUsers doc', e);
       }
+      console.warn('[allowedUsers] No doc found. Tried IDs:', tried.join(', '));
       return null;
     }
 
@@ -151,7 +176,7 @@
       if (user) {
         const allowedSnap = await fetchAllowedUserDoc(user);
         if (!allowedSnap) {
-          alert('Access denied: no allowlist entry found for this account.');
+          alert('Access denied: no allowlist entry found for this account (tried original email, lowercase email, and UID). Ask an admin to create an allowedUsers doc with parent/student flags.');
           await auth.signOut();
           if (unsubscribe) unsubscribe();
           loginSection.style.display = '';
