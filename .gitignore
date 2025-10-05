@@ -1,2 +1,3 @@
 google-cloud-sdk/
 test/*.json*
+remote-firestore.rules

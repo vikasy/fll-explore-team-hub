@@ -20,27 +20,33 @@ service cloud.firestore {
       );
     }
 
-    // Static parent list (retained from remote rules). Consider migrating to role docs later.
-    function isAllowedParent() {
-      return request.auth != null && (
-        request.auth.token.email == "ketaki.kale@gmail.com" ||
-        request.auth.token.email == "dedhia.krina@gmail.com" ||
-        request.auth.token.email == "juididolkr@gmail.com" ||
-        request.auth.token.email == "namitachitre85@gmail.com" ||
-        request.auth.token.email == "vikasy@gmail.com" ||
-        request.auth.token.email == "fll2025.westvalley.cusdk8@gmail.com" ||
-        request.auth.token.email == "vatsaheera@gmail.com" ||
-        request.auth.token.email == "kashyap.parab@gmail.com"
-      );
+    /* Role-based access (dynamic): parent / student flags live inside allowedUsers docs.
+       Expect each allowedUsers doc (keyed by authEmail() OR auth.uid) to optionally contain:
+         parent: true|false
+         student: true|false
+       Missing flag is treated as false. This eliminates the need to redeploy for membership changes.
+    */
+    function hasEmailAllowedDoc() {
+      return exists(/databases/$(database)/documents/allowedUsers/$(authEmail()));
+    }
+    function emailAllowedDoc() {
+      return get(/databases/$(database)/documents/allowedUsers/$(authEmail()));
+    }
+    function hasUidAllowedDoc() {
+      return exists(/databases/$(database)/documents/allowedUsers/$(request.auth.uid));
+    }
+    function uidAllowedDoc() {
+      return get(/databases/$(database)/documents/allowedUsers/$(request.auth.uid));
     }
 
-    // Static student list (retained from remote rules)
-    function isAllowedStudent() {
-      return request.auth != null && (
-        request.auth.token.email == "yadavnaom@gmail.com" ||
-        request.auth.token.email == "fll2025.westvalley.cusdk8@gmail.com"
-      );
+    // Resolve role flag from whichever doc (email preferred). Falls back to UID doc.
+    function roleFlag(flag) {
+      return hasEmailAllowedDoc() ? emailAllowedDoc().data[flag] : (
+             hasUidAllowedDoc() ? uidAllowedDoc().data[flag] : false);
     }
+
+    function isAllowedParent() { return isAllowedUser() && roleFlag('parent') == true; }
+    function isAllowedStudent() { return isAllowedUser() && roleFlag('student') == true; }
 
     /* ===================== Collections ===================== */
 
@@ -68,7 +74,7 @@ service cloud.firestore {
       allow read, write: if isAllowedParent();
     }
 
-    // Student conversation: allow parents OR listed students
+    // Student conversation: allow parents OR students
     match /student_conversation/{docId} {
       allow read, write: if isAllowedParent() || isAllowedStudent();
     }
