@@ -1,39 +1,94 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAuthed() {
-      return request.auth != null;
+    /* ===================== Helper Functions ===================== */
+    function isAuthed() { 
+      return request.auth != null; 
     }
 
-    // Returns the authenticated user's email (may be null on some providers)
     function authEmail() {
       return request.auth != null && request.auth.token.email != null
         ? request.auth.token.email
         : '';
     }
 
-    // Allowlist check: a user is allowed if a document exists in 'allowedUsers'
-    // with ID equal to either their email or their UID.
-    // NOTE: Ensure the doc ID matches the exact email string Firebase provides
-    // (usually lowercase for Google accounts) OR add a doc keyed by auth.uid.
+    // Dynamic allowlist: user is allowed if they have a doc keyed by email OR uid
     function isAllowedUser() {
-      return exists(/databases/$(database)/documents/allowedUsers/$(authEmail())) ||
-             exists(/databases/$(database)/documents/allowedUsers/$(request.auth.uid));
+      return isAuthed() && (
+        exists(/databases/$(database)/documents/allowedUsers/$(authEmail())) ||
+        exists(/databases/$(database)/documents/allowedUsers/$(request.auth.uid))
+      );
     }
 
-    // Allowlist collection: let a signed-in user create/read their own doc by exact email or UID
+    // Static parent list (retained from remote rules). Consider migrating to role docs later.
+    function isAllowedParent() {
+      return request.auth != null && (
+        request.auth.token.email == "ketaki.kale@gmail.com" ||
+        request.auth.token.email == "dedhia.krina@gmail.com" ||
+        request.auth.token.email == "juididolkr@gmail.com" ||
+        request.auth.token.email == "namitachitre85@gmail.com" ||
+        request.auth.token.email == "vikasy@gmail.com" ||
+        request.auth.token.email == "fll2025.westvalley.cusdk8@gmail.com" ||
+        request.auth.token.email == "vatsaheera@gmail.com" ||
+        request.auth.token.email == "kashyap.parab@gmail.com"
+      );
+    }
+
+    // Static student list (retained from remote rules)
+    function isAllowedStudent() {
+      return request.auth != null && (
+        request.auth.token.email == "yadavnaom@gmail.com" ||
+        request.auth.token.email == "fll2025.westvalley.cusdk8@gmail.com"
+      );
+    }
+
+    /* ===================== Collections ===================== */
+
+    // Allowlist self-service: user can read/write ONLY their own doc (email or uid)
     match /allowedUsers/{id} {
-      allow read: if isAuthed() && (id == authEmail() || id == request.auth.uid);
-      allow write: if isAuthed() && (id == authEmail() || id == request.auth.uid);
+      allow read, write: if isAuthed() && (id == authEmail() || id == request.auth.uid);
     }
 
     // Team-shared progress for session checklist
     match /scheduleProgress/{sessionId} {
-      allow read: if isAuthed() && isAllowedUser();
-      allow write: if isAuthed() && isAllowedUser()
-                   && request.resource.data.keys().hasOnly(['items', 'updatedAt', 'updatedBy'])
-                   && (request.resource.data.items is list)
-                   && request.resource.data.items.size() <= 200;
+      allow read: if isAllowedUser();
+      allow write: if isAllowedUser()
+        && request.resource.data.keys().hasOnly(['items', 'updatedAt', 'updatedBy'])
+        && (request.resource.data.items is list)
+        && request.resource.data.items.size() <= 200;
     }
+
+    // Parent conversation (chat/messages)
+    match /parent_conversation/{docId} {
+      allow read, write: if isAllowedParent();
+    }
+
+    // Parent nightly opt-in
+    match /parent_nightly_optin/{docId} {
+      allow read, write: if isAllowedParent();
+    }
+
+    // Student conversation: allow parents OR listed students
+    match /student_conversation/{docId} {
+      allow read, write: if isAllowedParent() || isAllowedStudent();
+    }
+
+    // Student nightly opt-in
+    match /student_nightly_optin/{docId} {
+      allow read, write: if isAllowedStudent();
+    }
+
+    // Media assets: public read (as per remote). Create/update restricted to parents.
+    match /media/{mediaId} {
+      allow read: if true;               // PUBLIC READ
+      allow create, update: if isAllowedParent();
+      allow delete: if false;            // Prevent deletes unless you intentionally add logic
+    }
+
+    /* OPTIONAL: Add a final catch-all deny for safety
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    */
   }
 }
