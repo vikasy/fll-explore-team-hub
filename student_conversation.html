@@ -93,11 +93,9 @@
   </footer>
   <script>
     const ADMIN_EMAIL = 'fll2025.westvalley.cusdk8@gmail.com';
-    // Allowlist of student emails (add as needed)
-    const allowUser = [
-      'yadavnaom@gmail.com',
-      // Add more student emails here
-    ];
+    // Dynamic role-based access now: parent or student flags in allowedUsers collection.
+    // We no longer use a static email list; instead we read the user's allowedUsers doc
+    // (by email first, then uid) and require parent==true OR student==true.
 
     // Firebase config (reuse from main site)
     const firebaseConfig = {
@@ -132,32 +130,63 @@
     };
     logoutBtn.onclick = () => auth.signOut();
 
+    async function fetchAllowedUserDoc(user) {
+      const emailKey = (user.email || '').toLowerCase();
+      try {
+        // Try email doc first
+        const emailDocRef = db.collection('allowedUsers').doc(emailKey);
+        const emailSnap = await emailDocRef.get();
+        if (emailSnap.exists) return emailSnap;
+        // Fallback to UID doc
+        const uidDocRef = db.collection('allowedUsers').doc(user.uid);
+        const uidSnap = await uidDocRef.get();
+        if (uidSnap.exists) return uidSnap;
+      } catch (e) {
+        console.error('Error fetching allowedUsers doc', e);
+      }
+      return null;
+    }
+
     auth.onAuthStateChanged(async user => {
       if (user) {
-        // Restrict access to allowUser list
-        const email = (user.email || '').toLowerCase();
-        if (!allowUser.includes(email)) {
-          alert('Access denied: Your email is not authorized to use this site.');
+        const allowedSnap = await fetchAllowedUserDoc(user);
+        if (!allowedSnap) {
+          alert('Access denied: no allowlist entry found for this account.');
           await auth.signOut();
+          if (unsubscribe) unsubscribe();
           loginSection.style.display = '';
           chatSection.style.display = 'none';
           logoutBtn.style.display = 'none';
           userInfo.textContent = '';
-          if (unsubscribe) unsubscribe();
+          if (adminFooter) adminFooter.style.display = 'none';
           return;
         }
-  loginSection.style.display = 'none';
+        const data = allowedSnap.data() || {};
+        const isParent = data.parent === true; // boolean must be true
+        const isStudent = data.student === true; // boolean must be true
+        if (!isParent && !isStudent) {
+          alert('Access denied: your role does not permit viewing this conversation.');
+          await auth.signOut();
+          if (unsubscribe) unsubscribe();
+          loginSection.style.display = '';
+          chatSection.style.display = 'none';
+          logoutBtn.style.display = 'none';
+          userInfo.textContent = '';
+          if (adminFooter) adminFooter.style.display = 'none';
+          return;
+        }
+        loginSection.style.display = 'none';
         chatSection.style.display = '';
         logoutBtn.style.display = '';
         userInfo.textContent = user.displayName || user.email;
-  if (adminFooter) adminFooter.style.display = '';
+        if (adminFooter) adminFooter.style.display = '';
         loadMessages();
       } else {
-  loginSection.style.display = '';
+        loginSection.style.display = '';
         chatSection.style.display = 'none';
         logoutBtn.style.display = 'none';
         userInfo.textContent = '';
-  if (adminFooter) adminFooter.style.display = 'none';
+        if (adminFooter) adminFooter.style.display = 'none';
         if (unsubscribe) unsubscribe();
       }
     });
