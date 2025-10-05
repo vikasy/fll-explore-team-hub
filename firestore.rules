@@ -78,11 +78,11 @@ service cloud.firestore {
       allow read, write: if isAllowedStudent();
     }
 
-    // Media assets: public read (as per remote). Create/update restricted to parents.
+    // Media assets: restrict read & write to allowed parents or students (no public access)
     match /media/{mediaId} {
-      allow read: if true;               // PUBLIC READ
-      allow create, update: if isAllowedParent();
-      allow delete: if false;            // Prevent deletes unless you intentionally add logic
+      allow read: if isAllowedParent() || isAllowedStudent();
+      allow create, update: if isAllowedParent() || isAllowedStudent();
+      allow delete: if false; // tighten until explicit moderation logic added
     }
 
     /* OPTIONAL: Add a final catch-all deny for safety
