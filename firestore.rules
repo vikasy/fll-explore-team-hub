@@ -53,9 +53,13 @@ service cloud.firestore {
 
     /* ===================== Collections ===================== */
 
-    // Allowlist self-service: user can read/write ONLY their own doc (email or uid)
+    // Allowlist management:
+    //  - Any authenticated user can read/write ONLY their own doc (email or uid)
+    //  - Admins (roleFlag 'admin') can read/write any allowedUsers doc to manage roles
     match /allowedUsers/{id} {
-      allow read, write: if isAuthed() && (id == authEmail() || id == request.auth.uid);
+      allow read, write: if isAuthed() && (
+        (id == authEmail() || id == request.auth.uid) || isAllowedAdmin()
+      );
     }
 
     // Team-shared progress for session checklist
