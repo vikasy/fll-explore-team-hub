@@ -131,6 +131,10 @@
           document.getElementById('auth-box').style.filter = '';
           failedAttempts = 0;
           lockUntil = 0;
+          const lb = document.getElementById('login-btn');
+          if (lb) lb.disabled = false;
+          // If already signed in (e.g., redirect flow), reflect UI
+          if (typeof handleAuth === 'function') handleAuth(auth.currentUser);
         } else {
           failedAttempts++;
           if (failedAttempts >= MAX_ATTEMPTS) {
@@ -154,6 +158,9 @@
         document.getElementById('secret-msg').textContent='';
       });
       document.getElementById('secret-input').addEventListener('keydown', e => { if(e.key==='Enter'){ attemptUnlock(); }});
+      // Prevent login attempts before secret gate passes
+      const lb = document.getElementById('login-btn');
+      if (lb) lb.disabled = true;
       updateLockUI();
     });
     const firebaseConfig = {
@@ -224,14 +231,14 @@
         return false;
       }
     }
-
-    auth.onAuthStateChanged(async user => {
-      if (!secretUnlocked) { return; } // ignore auth events until unlocked
+    async function handleAuth(user){
+      if (!secretUnlocked) return; // wait until secret gate passed
       if (user) {
         userInfo.textContent = user.email || user.uid;
         loginBtn.style.display = 'none';
         logoutBtn.style.display = '';
-        const admin = await isAdmin(user);
+        let admin = false;
+        try { admin = await isAdmin(user); } catch(_) {}
         if (admin) {
           adminStatus.innerHTML = '<span class="success">You are admin.</span>';
           guestForm.style.display = '';
@@ -248,7 +255,9 @@
         guestForm.style.display = 'none';
         adminStatus.textContent = '';
       }
-    });
+    }
+
+    auth.onAuthStateChanged(user => handleAuth(user));
 
     document.getElementById('guest-form').addEventListener('submit', async (e) => {
       e.preventDefault();
