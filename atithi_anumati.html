@@ -127,12 +127,9 @@
           document.getElementById('secret-gate').style.display = 'none';
           msg.textContent = '';
           log('Secret gate unlocked', 'success');
-          // Allow auth box to operate now
-          document.getElementById('auth-box').style.filter = '';
+          // Secret accepted; reset counters (auth box already active)
           failedAttempts = 0;
           lockUntil = 0;
-          const lb = document.getElementById('login-btn');
-          if (lb) lb.disabled = false;
           // If already signed in (e.g., redirect flow), reflect UI
           if (typeof handleAuth === 'function') handleAuth(auth.currentUser);
         } else {
@@ -150,17 +147,12 @@
       }
     }
     window.addEventListener('DOMContentLoaded', () => {
-      // Blur underlying UI until unlocked
-      document.getElementById('auth-box').style.filter = 'blur(3px)';
       document.getElementById('secret-submit').addEventListener('click', attemptUnlock);
       document.getElementById('secret-cancel').addEventListener('click', () => {
         document.getElementById('secret-input').value='';
         document.getElementById('secret-msg').textContent='';
       });
       document.getElementById('secret-input').addEventListener('keydown', e => { if(e.key==='Enter'){ attemptUnlock(); }});
-      // Prevent login attempts before secret gate passes
-      const lb = document.getElementById('login-btn');
-      if (lb) lb.disabled = true;
       updateLockUI();
     });
     const firebaseConfig = {
