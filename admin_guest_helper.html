@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Guest Access Helper</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 1rem; max-width: 700px; }
+    h1 { color: #0052a3; }
+    label { display:block; margin-top:0.75rem; font-weight:600; }
+    input, select { padding:0.4rem; width:100%; max-width:420px; }
+    button { background:#0052a3; color:#fff; border:none; padding:0.5rem 1rem; margin-top:1rem; cursor:pointer; }
+    button:disabled { background:#777; cursor: not-allowed; }
+    .log { background:#f5f5f5; padding:0.75rem; border:1px solid #ddd; margin-top:1rem; font-size:0.9rem; white-space:pre-wrap; }
+    .success { color: #0a7a2a; font-weight:600; }
+    .error { color: #b00020; font-weight:600; }
+    .warning { color:#a36a00; }
+    .role-row { display:flex; gap:1rem; flex-wrap:wrap; margin-top:0.5rem; }
+    .role-row > label { font-weight:400; display:flex; align-items:center; gap:0.25rem; }
+    footer { margin-top:2rem; font-size:0.8rem; color:#555; }
+  </style>
+</head>
+<body>
+  <h1>Guest / Role Access Helper</h1>
+  <p>This page lets an <strong>admin</strong> create or update entries in <code>allowedUsers</code> for temporary guest viewing or permanent role flags. Keep this page private (do not link publicly).</p>
+  <div id="auth-box">
+    <button id="login-btn">Login with Google</button>
+    <button id="logout-btn" style="display:none;">Logout</button>
+    <span id="user-info" style="margin-left:1rem;font-weight:bold;"></span>
+    <div id="admin-status" style="margin-top:0.5rem;"></div>
+  </div>
+  <hr />
+  <form id="guest-form" style="display:none;">
+    <label>Email (guest or user to modify)</label>
+    <input type="email" id="target-email" placeholder="guest@example.org" required />
+    <label>Base Role Flags</label>
+    <div class="role-row">
+      <label><input type="checkbox" id="role-parent" /> parent</label>
+      <label><input type="checkbox" id="role-student" /> student</label>
+      <label><input type="checkbox" id="role-admin" /> admin</label>
+      <label><input type="checkbox" id="role-guest" /> guest (view-only if no other roles)</label>
+    </div>
+    <label>Guest Duration (days) — only applies if guest checked</label>
+    <input type="number" id="guest-days" min="1" max="60" value="7" />
+    <button type="submit" id="create-btn">Create / Update</button>
+  </form>
+  <div class="log" id="log-box"></div>
+  <footer>
+    <p>Security: This page relies on Firestore rules. Only users with <code>admin: true</code> in their <code>allowedUsers</code> doc should use it. Remove the file if leaked.</p>
+  </footer>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
+      authDomain: "fllex2wv.firebaseapp.com",
+      projectId: "fllex2wv",
+      storageBucket: "fllex2wv.appspot.com",
+      messagingSenderId: "105509048133",
+      appId: "1:105509048133:web:2655ec171befe83d09b82c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userInfo = document.getElementById('user-info');
+    const adminStatus = document.getElementById('admin-status');
+    const guestForm = document.getElementById('guest-form');
+    const logBox = document.getElementById('log-box');
+
+    function log(msg, cls) {
+      const line = document.createElement('div');
+      if (cls) line.classList.add(cls);
+      line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+      logBox.appendChild(line);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    loginBtn.onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(e => log('Login failed: ' + e.message, 'error'));
+    };
+    logoutBtn.onclick = () => auth.signOut();
+
+    async function getAllowedDocFor(user) {
+      const email = (user.email || '').toLowerCase();
+      const emailRef = db.collection('allowedUsers').doc(email);
+      const snap = await emailRef.get();
+      return { ref: emailRef, snap };
+    }
+
+    async function isAdmin(user) {
+      if (!user) return false;
+      try {
+        const { snap } = await getAllowedDocFor(user);
+        return snap.exists && snap.data().admin === true;
+      } catch (e) {
+        log('Admin check error: ' + e.message, 'error');
+        return false;
+      }
+    }
+
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        userInfo.textContent = user.email || user.uid;
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = '';
+        const admin = await isAdmin(user);
+        if (admin) {
+          adminStatus.innerHTML = '<span class="success">You are admin.</span>';
+          guestForm.style.display = '';
+          log('Admin login OK', 'success');
+        } else {
+          adminStatus.innerHTML = '<span class="error">You are not admin. Access restricted.</span>';
+          guestForm.style.display = 'none';
+          log('Non-admin user logged in, form hidden.', 'warning');
+        }
+      } else {
+        userInfo.textContent = '';
+        loginBtn.style.display = '';
+        logoutBtn.style.display = 'none';
+        guestForm.style.display = 'none';
+        adminStatus.textContent = '';
+      }
+    });
+
+    document.getElementById('guest-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user) return log('Not signed in.', 'error');
+      if (!(await isAdmin(user))) return log('Denied: not admin.', 'error');
+      const email = document.getElementById('target-email').value.trim().toLowerCase();
+      if (!email) return log('Email required', 'error');
+      const parent = document.getElementById('role-parent').checked;
+      const student = document.getElementById('role-student').checked;
+      const adminFlag = document.getElementById('role-admin').checked;
+      const guest = document.getElementById('role-guest').checked;
+      const guestDays = parseInt(document.getElementById('guest-days').value || '0', 10);
+      const docRef = db.collection('allowedUsers').doc(email);
+      const data = { updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+      if (parent) data.parent = true; else data.parent = false;
+      if (student) data.student = true; else data.student = false;
+      if (adminFlag) data.admin = true; else data.admin = false;
+      if (guest) data.guest = true; else data.guest = false;
+      if (guest && guestDays > 0) {
+        // Store a human hint since we removed enforced expiration in rules
+        const expireDate = new Date(Date.now() + guestDays * 86400000);
+        data.guestNote = 'Intended expire (manual): ' + expireDate.toISOString();
+      } else {
+        data.guestNote = firebase.firestore.FieldValue.delete();
+      }
+      try {
+        await docRef.set(data, { merge: true });
+        log('Updated allowedUsers doc for ' + email, 'success');
+      } catch (e2) {
+        log('Write failed: ' + e2.message, 'error');
+      }
+    });
+  </script>
+</body>
+</html>

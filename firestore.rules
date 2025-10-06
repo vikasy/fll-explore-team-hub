@@ -12,7 +12,7 @@ service cloud.firestore {
         : '';
     }
 
-    // Dynamic allowlist: user is allowed if they have a doc keyed by email OR uid
+    // Dynamic allowlist (simplified): user is allowed if they have a doc keyed by email OR uid.
     function isAllowedUser() {
       return isAuthed() && (
         exists(/databases/$(database)/documents/allowedUsers/$(authEmail())) ||
@@ -46,9 +46,10 @@ service cloud.firestore {
              hasUidAllowedDoc() ? uidAllowedDoc().data[flag] : false);
     }
 
-  function isAllowedParent() { return isAllowedUser() && roleFlag('parent') == true; }
-  function isAllowedStudent() { return isAllowedUser() && roleFlag('student') == true; }
-  function isAllowedAdmin() { return isAllowedUser() && roleFlag('admin') == true; }
+    function isAllowedParent() { return isAllowedUser() && roleFlag('parent') == true; }
+    function isAllowedStudent() { return isAllowedUser() && roleFlag('student') == true; }
+    function isAllowedAdmin() { return isAllowedUser() && roleFlag('admin') == true; }
+    function isAllowedGuest() { return isAllowedUser() && roleFlag('guest') == true; }
 
     /* ===================== Collections ===================== */
 
@@ -60,7 +61,8 @@ service cloud.firestore {
     // Team-shared progress for session checklist
     match /scheduleProgress/{sessionId} {
       allow read: if isAllowedUser();
-      allow write: if isAllowedUser()
+      // Only non-guest roles (parent, student, admin) may write progress
+      allow write: if (isAllowedParent() || isAllowedStudent() || isAllowedAdmin())
         && request.resource.data.keys().hasOnly(['items', 'updatedAt', 'updatedBy'])
         && (request.resource.data.items is list)
         && request.resource.data.items.size() <= 200;
