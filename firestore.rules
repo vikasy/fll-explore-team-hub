@@ -24,6 +24,7 @@ service cloud.firestore {
        Expect each allowedUsers doc (keyed by authEmail() OR auth.uid) to optionally contain:
          parent: true|false
          student: true|false
+         admin: true|false (grants elevated capabilities such as reading access logs)
        Missing flag is treated as false. This eliminates the need to redeploy for membership changes.
     */
     function hasEmailAllowedDoc() {
@@ -45,8 +46,9 @@ service cloud.firestore {
              hasUidAllowedDoc() ? uidAllowedDoc().data[flag] : false);
     }
 
-    function isAllowedParent() { return isAllowedUser() && roleFlag('parent') == true; }
-    function isAllowedStudent() { return isAllowedUser() && roleFlag('student') == true; }
+  function isAllowedParent() { return isAllowedUser() && roleFlag('parent') == true; }
+  function isAllowedStudent() { return isAllowedUser() && roleFlag('student') == true; }
+  function isAllowedAdmin() { return isAllowedUser() && roleFlag('admin') == true; }
 
     /* ===================== Collections ===================== */
 
@@ -89,6 +91,17 @@ service cloud.firestore {
       allow read: if isAllowedParent() || isAllowedStudent();
       allow create, update: if isAllowedParent() || isAllowedStudent();
       allow delete: if false; // tighten until explicit moderation logic added
+    }
+
+    // Access logs: one per user per day (doc id pattern: <uid>_<YYYYMMDD>)
+    match /accessLogs/{logId} {
+      allow create: if isAllowedUser()
+        && request.resource.data.keys().hasOnly(['uid','email','ts','date'])
+        && request.resource.data.uid == request.auth.uid
+        && logId == (request.auth.uid + '_' + request.resource.data.date);
+      // Only admins can read access logs.
+      allow read: if isAllowedAdmin();
+      allow update, delete: if false; // immutable once written
     }
 
     /* OPTIONAL: Add a final catch-all deny for safety
