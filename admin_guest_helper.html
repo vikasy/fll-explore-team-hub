@@ -78,9 +78,27 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
-    loginBtn.onclick = () => {
+    // Environment sanity check (popup auth requires http/https, not file://)
+    if (location.protocol !== 'http:' && location.protocol !== 'https:') {
+      log('Warning: You are opening this page with protocol ' + location.protocol + '. Firebase auth popups will fail. Serve the site via a local web server (e.g., "firebase hosting:channel:deploy" or "npx http-server") or deploy to Firebase Hosting.', 'warning');
+    }
+
+    loginBtn.onclick = async () => {
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(e => log('Login failed: ' + e.message, 'error'));
+      try {
+        await auth.signInWithPopup(provider);
+      } catch (e) {
+        if (e && (e.code === 'auth/operation-not-supported-in-this-environment')) {
+          log('Popup auth not supported in this environment. Attempting redirect sign-in...', 'warning');
+          try {
+            await auth.signInWithRedirect(provider);
+          } catch (e2) {
+            log('Redirect login failed: ' + e2.message, 'error');
+          }
+        } else {
+          log('Login failed: ' + (e && e.message ? e.message : e), 'error');
+        }
+      }
     };
     logoutBtn.onclick = () => auth.signOut();
 
