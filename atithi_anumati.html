@@ -81,16 +81,43 @@
   // To set: open devtools console and run: copy(await (async ()=>{const enc=new TextEncoder().encode('YourPassphrase');const buf=await crypto.subtle.digest('SHA-256',enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');})())
   // Then paste hash here and redeploy.
   const SECRET_HASH = 'b98b58aa290a625159292068d687e4c9844e334c36c1bc634a46c661af18b1d3'; // SHA-256 hash of secret phrase (colorYEARthing)
-    let secretUnlocked = false;
+  let secretUnlocked = false;
+  let failedAttempts = 0;
+  let lockUntil = 0; // epoch ms when next attempt allowed
+  const MAX_ATTEMPTS = 5;
+  const LOCK_DURATION_MS = 180 * 1000; // 180 seconds
     async function sha256Hex(str){
       const enc = new TextEncoder().encode(str);
       const buf = await crypto.subtle.digest('SHA-256', enc);
       return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
     }
+    function updateLockUI() {
+      const msg = document.getElementById('secret-msg');
+      const btn = document.getElementById('secret-submit');
+      if (Date.now() < lockUntil) {
+        const remaining = Math.ceil((lockUntil - Date.now()) / 1000);
+        msg.textContent = 'Too many failed attempts. Wait ' + remaining + 's before retrying.';
+        btn.disabled = true;
+      } else {
+        if (failedAttempts > 0 && failedAttempts < MAX_ATTEMPTS) {
+          msg.textContent = 'Attempts: ' + failedAttempts + '/' + MAX_ATTEMPTS;
+        }
+        btn.disabled = false;
+      }
+    }
+
+    // Periodically refresh cooldown display if locked
+    setInterval(() => {
+      if (lockUntil && Date.now() < lockUntil) updateLockUI();
+      else if (lockUntil && Date.now() >= lockUntil) { lockUntil = 0; updateLockUI(); }
+    }, 1000);
+
     async function attemptUnlock(){
       const inp = document.getElementById('secret-input');
       const msg = document.getElementById('secret-msg');
       const val = inp.value.trim();
+      // Check lock first
+      if (Date.now() < lockUntil) { updateLockUI(); return; }
       if (!val){ msg.textContent = 'Enter a passphrase.'; return; }
       msg.textContent = 'Verifying…';
       try {
@@ -102,8 +129,17 @@
           log('Secret gate unlocked', 'success');
           // Allow auth box to operate now
           document.getElementById('auth-box').style.filter = '';
+          failedAttempts = 0;
+          lockUntil = 0;
         } else {
-          msg.textContent = 'Incorrect passphrase.';
+          failedAttempts++;
+          if (failedAttempts >= MAX_ATTEMPTS) {
+            lockUntil = Date.now() + LOCK_DURATION_MS;
+            updateLockUI();
+          } else {
+            msg.textContent = 'Incorrect passphrase. Attempts: ' + failedAttempts + '/' + MAX_ATTEMPTS;
+            updateLockUI();
+          }
         }
       } catch(e){
         msg.textContent = 'Error hashing secret.';
@@ -118,6 +154,7 @@
         document.getElementById('secret-msg').textContent='';
       });
       document.getElementById('secret-input').addEventListener('keydown', e => { if(e.key==='Enter'){ attemptUnlock(); }});
+      updateLockUI();
     });
     const firebaseConfig = {
       apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
