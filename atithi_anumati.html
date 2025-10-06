@@ -55,14 +55,7 @@
   <form id="guest-form" style="display:none;">
     <label>Email (guest or user to modify)</label>
     <input type="email" id="target-email" placeholder="guest@example.org" required />
-    <label>Base Role Flags</label>
-    <div class="role-row">
-      <label><input type="checkbox" id="role-parent" /> parent</label>
-      <label><input type="checkbox" id="role-student" /> student</label>
-      <label><input type="checkbox" id="role-admin" /> admin</label>
-      <label><input type="checkbox" id="role-guest" /> guest (view-only if no other roles)</label>
-    </div>
-    <label>Guest Duration (days) — only applies if guest checked</label>
+    <label>Guest Duration (days) (optional note only)</label>
     <input type="number" id="guest-days" min="1" max="60" value="7" />
     <button type="submit" id="create-btn">Create / Update</button>
   </form>
@@ -258,19 +251,17 @@
       if (!(await isAdmin(user))) return log('Denied: not admin.', 'error');
       const email = document.getElementById('target-email').value.trim().toLowerCase();
       if (!email) return log('Email required', 'error');
-      const parent = document.getElementById('role-parent').checked;
-      const student = document.getElementById('role-student').checked;
-      const adminFlag = document.getElementById('role-admin').checked;
-      const guest = document.getElementById('role-guest').checked;
       const guestDays = parseInt(document.getElementById('guest-days').value || '0', 10);
       const docRef = db.collection('allowedUsers').doc(email);
-      const data = { updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
-      if (parent) data.parent = true; else data.parent = false;
-      if (student) data.student = true; else data.student = false;
-      if (adminFlag) data.admin = true; else data.admin = false;
-      if (guest) data.guest = true; else data.guest = false;
-      if (guest && guestDays > 0) {
-        // Store a human hint since we removed enforced expiration in rules
+      const data = {
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        // Force guest-only role; explicitly set other roles false to avoid privilege carry-over.
+        guest: true,
+        parent: false,
+        student: false,
+        admin: false
+      };
+      if (guestDays > 0) {
         const expireDate = new Date(Date.now() + guestDays * 86400000);
         data.guestNote = 'Intended expire (manual): ' + expireDate.toISOString();
       } else {
@@ -278,7 +269,7 @@
       }
       try {
         await docRef.set(data, { merge: true });
-        log('Updated allowedUsers doc for ' + email, 'success');
+        log('Guest-only access updated for ' + email, 'success');
       } catch (e2) {
         log('Write failed: ' + e2.message, 'error');
       }
