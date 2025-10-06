@@ -25,6 +25,26 @@
 <body>
   <h1>Guest / Role Access Helper</h1>
   <p>This page lets an <strong>admin</strong> create or update entries in <code>allowedUsers</code> for temporary guest viewing or permanent role flags. Keep this page private (do not link publicly).</p>
+  <!-- Shared Secret Gate (Option 2: hashed secret) -->
+  <div id="secret-gate" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:9999;">
+    <div style="background:#fff;padding:1.25rem 1.5rem;border-radius:12px;max-width:420px;width:92%;box-shadow:0 4px 18px #0004;">
+      <h2 style="margin-top:0;color:#0052a3;font-size:1.25rem;">Restricted Helper</h2>
+      <p style="margin:0 0 0.75rem 0;line-height:1.35;">Enter the shared passphrase to continue. This is an additional light-weight barrier (hash verified client‑side). Rotate periodically.</p>
+      <input type="password" id="secret-input" placeholder="Passphrase" style="width:100%;padding:0.55rem;border:1px solid #bbb;border-radius:6px;" autofocus />
+      <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
+        <button id="secret-submit" style="flex:1;">Unlock</button>
+        <button id="secret-cancel" style="background:#777;flex:0 0 auto;">Clear</button>
+      </div>
+      <div id="secret-msg" style="margin-top:0.6rem;font-size:0.85rem;color:#b00020;min-height:1.1em;"></div>
+      <details style="margin-top:0.75rem;">
+        <summary style="cursor:pointer;font-size:0.8rem;">How to change secret</summary>
+        <div style="font-size:0.7rem;line-height:1.2;margin-top:0.4rem;">
+          1. Pick phrase. 2. Compute SHA‑256 hex (e.g. <code>echo -n 'MyPhrase' | shasum -a 256</code>).<br />
+          3. Replace <code>SECRET_HASH</code> constant in file. 4. Commit & deploy.
+        </div>
+      </details>
+    </div>
+  </div>
   <div id="auth-box">
     <button id="login-btn">Login with Google</button>
     <button id="logout-btn" style="display:none;">Logout</button>
@@ -51,6 +71,54 @@
     <p>Security: This page relies on Firestore rules. Only users with <code>admin: true</code> in their <code>allowedUsers</code> doc should use it. Remove the file if leaked.</p>
   </footer>
   <script>
+    /* =============================================================
+       Shared Secret Gate (Hash Compare)
+       Replace SECRET_HASH with the SHA-256 hex digest of your phrase.
+       Current hash corresponds to phrase placeholder: ReplaceMe123!
+       DO NOT leave default in production. Generate your own strong phrase.
+    ============================================================= */
+  // Build meta: embedded at commit c15f1c1. Replace SECRET_HASH below with the SHA-256 of your chosen passphrase.
+  // To set: open devtools console and run: copy(await (async ()=>{const enc=new TextEncoder().encode('YourPassphrase');const buf=await crypto.subtle.digest('SHA-256',enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');})())
+  // Then paste hash here and redeploy.
+  const SECRET_HASH = 'b98b58aa290a625159292068d687e4c9844e334c36c1bc634a46c661af18b1d3'; // SHA-256 hash of secret phrase (colorYEARthing)
+    let secretUnlocked = false;
+    async function sha256Hex(str){
+      const enc = new TextEncoder().encode(str);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+    async function attemptUnlock(){
+      const inp = document.getElementById('secret-input');
+      const msg = document.getElementById('secret-msg');
+      const val = inp.value.trim();
+      if (!val){ msg.textContent = 'Enter a passphrase.'; return; }
+      msg.textContent = 'Verifying…';
+      try {
+        const h = await sha256Hex(val);
+        if (h === SECRET_HASH){
+          secretUnlocked = true;
+          document.getElementById('secret-gate').style.display = 'none';
+          msg.textContent = '';
+          log('Secret gate unlocked', 'success');
+          // Allow auth box to operate now
+          document.getElementById('auth-box').style.filter = '';
+        } else {
+          msg.textContent = 'Incorrect passphrase.';
+        }
+      } catch(e){
+        msg.textContent = 'Error hashing secret.';
+      }
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      // Blur underlying UI until unlocked
+      document.getElementById('auth-box').style.filter = 'blur(3px)';
+      document.getElementById('secret-submit').addEventListener('click', attemptUnlock);
+      document.getElementById('secret-cancel').addEventListener('click', () => {
+        document.getElementById('secret-input').value='';
+        document.getElementById('secret-msg').textContent='';
+      });
+      document.getElementById('secret-input').addEventListener('keydown', e => { if(e.key==='Enter'){ attemptUnlock(); }});
+    });
     const firebaseConfig = {
       apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
       authDomain: "fllex2wv.firebaseapp.com",
@@ -121,6 +189,7 @@
     }
 
     auth.onAuthStateChanged(async user => {
+      if (!secretUnlocked) { return; } // ignore auth events until unlocked
       if (user) {
         userInfo.textContent = user.email || user.uid;
         loginBtn.style.display = 'none';
