@@ -610,6 +610,7 @@
       const container = document.getElementById('team-progress-container');
       const headers = rows[0];
       const activityIdx = headers.findIndex(h => (h || '').trim().toLowerCase() === 'activity');
+      const statusIdx = headers.findIndex(h => (h || '').trim().toLowerCase() === 'status');
       const sessionIdx = headers.findIndex(h => (h || '').trim().toLowerCase() === 'session #');
       const dateIdx = headers.findIndex(h => (h || '').trim().toLowerCase() === 'hosting date');
 
@@ -792,6 +793,26 @@
             } catch (e) {
               console.warn('Could not attach Firestore listener for session', key, e);
               setScheduleStatus('Could not start cloud sync: ' + (e && e.message ? e.message : e), 'error');
+            }
+          } else if (c === statusIdx) {
+            // Multi-line status (no checkboxes). Each non-empty line -> bullet.
+            const statusLines = String(r[c] || '')
+              .split('\n')
+              .map(s => s.trim())
+              .filter(s => s.length > 0);
+            if (statusLines.length > 1) {
+              const ul = document.createElement('ul');
+              ul.style.listStyle = 'disc';
+              ul.style.paddingLeft = '1.1rem';
+              ul.style.margin = '0';
+              statusLines.forEach(txt => {
+                const li = document.createElement('li');
+                li.textContent = txt;
+                ul.appendChild(li);
+              });
+              td.appendChild(ul);
+            } else {
+              td.textContent = statusLines[0] || '';
             }
           } else {
             td.textContent = r[c] || '';
