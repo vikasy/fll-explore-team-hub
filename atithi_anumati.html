@@ -60,6 +60,8 @@
     <button type="submit" id="create-btn">Create / Update</button>
   </form>
   <div class="log" id="log-box"></div>
+  <button id="access-logs-btn" style="display:none;margin-top:1rem;">Show Access Logs</button>
+  <div id="access-logs-panel" style="display:none;margin-top:0.75rem;padding:0.75rem;border:1px solid #ccc;border-radius:8px;background:#fafafa;"></div>
   <footer>
     <p>Security: This page relies on Firestore rules. Only users with <code>admin: true</code> in their <code>allowedUsers</code> doc should use it. Remove the file if leaked.</p>
   </footer>
@@ -166,6 +168,8 @@
     const adminStatus = document.getElementById('admin-status');
     const guestForm = document.getElementById('guest-form');
     const logBox = document.getElementById('log-box');
+  const accessLogsBtn = document.getElementById('access-logs-btn');
+  const accessLogsPanel = document.getElementById('access-logs-panel');
 
     function log(msg, cls) {
       const line = document.createElement('div');
@@ -228,10 +232,13 @@
           adminStatus.innerHTML = '<span class="success">You are admin.</span>';
           guestForm.style.display = '';
           log('Admin login OK', 'success');
+          if (accessLogsBtn) accessLogsBtn.style.display = '';
         } else {
           adminStatus.innerHTML = '<span class="error">You are not admin. Access restricted.</span>';
           guestForm.style.display = 'none';
           log('Non-admin user logged in, form hidden.', 'warning');
+          if (accessLogsBtn) accessLogsBtn.style.display = 'none';
+          if (accessLogsPanel) accessLogsPanel.style.display = 'none';
         }
       } else {
         userInfo.textContent = '';
@@ -239,6 +246,8 @@
         logoutBtn.style.display = 'none';
         guestForm.style.display = 'none';
         adminStatus.textContent = '';
+        if (accessLogsBtn) accessLogsBtn.style.display = 'none';
+        if (accessLogsPanel) accessLogsPanel.style.display = 'none';
       }
     }
 
@@ -274,6 +283,105 @@
         log('Write failed: ' + e2.message, 'error');
       }
     });
+
+    // ================= Access Logs Viewer (Option 3.A) =================
+    async function loadAccessLogs(limit=50) {
+      if (!accessLogsPanel) return;
+      accessLogsPanel.innerHTML = '<em>Loading access logs…</em>';
+      try {
+        const user = auth.currentUser;
+        if (!user || !(await isAdmin(user))) {
+          accessLogsPanel.innerHTML = '<span style="color:#b00020;">Not authorized.</span>';
+          return;
+        }
+        const snap = await db.collection('accessLogs')
+          .orderBy('ts','desc')
+          .limit(limit)
+          .get();
+        if (snap.empty) {
+          accessLogsPanel.innerHTML = '<em>No access log entries yet.</em>';
+          return;
+        }
+        const rows = [];
+        snap.forEach(doc => {
+          const data = doc.data() || {};
+          const ts = data.ts && data.ts.toDate ? data.ts.toDate() : null;
+          rows.push({
+            id: doc.id,
+            email: data.email || '',
+            uid: data.uid || '',
+            date: data.date || '',
+            tsISO: ts ? ts.toISOString() : ''
+          });
+        });
+        let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">'
+          + '<strong>Recent Access Logs (' + rows.length + ')</strong>'
+          + '<div style="font-size:0.8rem;display:flex;gap:0.5rem;">'
+          + '<button id="access-logs-refresh" style="margin:0;padding:0.25rem 0.5rem;">Refresh</button>'
+          + '<button id="access-logs-export" style="margin:0;padding:0.25rem 0.5rem;">CSV</button>'
+          + '</div></div>';
+        html += '<div style="max-height:280px;overflow:auto;border:1px solid #ddd;background:#fff;">';
+        html += '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">'
+          + '<thead><tr style="background:#eef;"><th style="padding:4px;border:1px solid #ccc;">Date</th><th style="padding:4px;border:1px solid #ccc;">Time (UTC)</th><th style="padding:4px;border:1px solid #ccc;">Email</th><th style="padding:4px;border:1px solid #ccc;">UID</th><th style="padding:4px;border:1px solid #ccc;">Doc ID</th></tr></thead><tbody>';
+        rows.forEach(r => {
+          let dateDisp = '', timeDisp = '';
+          if (r.tsISO) {
+            const dt = new Date(r.tsISO);
+            dateDisp = dt.toISOString().substring(0,10);
+            timeDisp = dt.toISOString().substring(11,19);
+          } else if (r.date) {
+            // fallback: date field only
+            dateDisp = r.date;
+          }
+          html += '<tr>'
+            + '<td style="padding:4px;border:1px solid #ddd;white-space:nowrap;">'+dateDisp+'</td>'
+            + '<td style="padding:4px;border:1px solid #ddd;white-space:nowrap;">'+timeDisp+'</td>'
+            + '<td style="padding:4px;border:1px solid #ddd;">'+(r.email||'')+'</td>'
+            + '<td style="padding:4px;border:1px solid #ddd;">'+(r.uid||'')+'</td>'
+            + '<td style="padding:4px;border:1px solid #ddd;">'+r.id+'</td>'
+            + '</tr>';
+        });
+        html += '</tbody></table></div>';
+        accessLogsPanel.innerHTML = html;
+        const refreshBtn = document.getElementById('access-logs-refresh');
+        if (refreshBtn) refreshBtn.onclick = () => loadAccessLogs(limit);
+        const exportBtn = document.getElementById('access-logs-export');
+        if (exportBtn) exportBtn.onclick = () => exportAccessLogsCSV(rows);
+      } catch (e) {
+        accessLogsPanel.innerHTML = '<span style="color:#b00020;">Failed to load logs: ' + (e && e.message ? e.message : e) + '</span>';
+      }
+    }
+
+    function exportAccessLogsCSV(rows) {
+      try {
+        if (!rows || !rows.length) return;
+        const header = ['id','email','uid','date','ts'].join(',');
+        const lines = rows.map(r => [r.id, r.email, r.uid, r.date, r.tsISO].map(v => '"'+String(v||'').replace(/"/g,'""')+'"').join(','));
+        const csv = [header, ...lines].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'accessLogs_export.csv';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+      } catch (e) {
+        log('CSV export failed: ' + (e && e.message ? e.message : e), 'error');
+      }
+    }
+
+    if (accessLogsBtn) {
+      accessLogsBtn.addEventListener('click', () => {
+        if (accessLogsPanel.style.display === 'none' || accessLogsPanel.style.display === '') {
+          accessLogsPanel.style.display = 'block';
+          loadAccessLogs();
+          accessLogsBtn.textContent = 'Hide Access Logs';
+        } else {
+          accessLogsPanel.style.display = 'none';
+          accessLogsBtn.textContent = 'Show Access Logs';
+        }
+      });
+    }
   </script>
 </body>
 </html>

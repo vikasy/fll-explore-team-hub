@@ -1165,6 +1165,37 @@
               }
               // Enable to-do list
               if (typeof loadTasks === 'function') loadTasks();
+
+              // --- Automatic daily access logging ---
+              try {
+                const today = new Date();
+                const y = today.getFullYear();
+                const m = String(today.getMonth() + 1).padStart(2, '0');
+                const d = String(today.getDate()).padStart(2, '0');
+                const dateStr = `${y}${m}${d}`; // YYYYMMDD per rules pattern
+                // Avoid duplicate work within same session
+                if (window.__lastAccessLogDate === dateStr) {
+                  // Already attempted this session
+                } else {
+                  window.__lastAccessLogDate = dateStr;
+                  const logId = uid + '_' + dateStr;
+                  const logRef = db.collection('accessLogs').doc(logId);
+                  const existing = await logRef.get();
+                  if (!existing.exists) {
+                    await logRef.set({
+                      uid: uid,
+                      email: (emailExact || '').toLowerCase(),
+                      date: dateStr,
+                      ts: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    console.log('[AccessLog] Created daily access log entry', logId);
+                  } else {
+                    console.log('[AccessLog] Entry already exists for today');
+                  }
+                }
+              } catch (e) {
+                console.warn('[AccessLog] Failed to write access log:', e && e.message ? e.message : e);
+              }
             }
           } catch (err) {
             console.error('[Firestore] Error checking allowlist:', err);
