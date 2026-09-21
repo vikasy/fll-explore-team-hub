@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Media | WV FLL Explore Team 2: Lego Diamonds</title>
+  <!-- Removed missing style.css reference -->
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; }
+    main { max-width: 900px; margin: 0 auto; padding: 1.5rem; background: #fff; min-height: 100vh; }
+    h1 { color: #0052a3; text-align: center; }
+    #media-upload { margin-bottom: 1rem; }
+    #media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 1rem; }
+    .media-item { background: #fff; border: 1px solid #dddddd; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); display: flex; flex-direction: column; }
+    .media-preview {
+      width: 100%;
+      aspect-ratio: 1/1;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 80px;
+      max-height: 120px;
+      padding: 0;
+    }
+    .media-meta { padding: 0.5rem 0.75rem 0.25rem 0.75rem; font-size: 0.95rem; color: #555; }
+    .media-comments { padding: 0.5rem 0.75rem 0.75rem 0.75rem; border-top: 1px solid #eee; }
+    @media (max-width: 600px) { main { padding: 0.5rem; } }
+  </style>
+</head>
+<body>
+  <header style="background:#0052a3;color:#fff;padding:1rem 1rem 1rem 1rem;">
+    <h1 style="margin:0;">West Valley Elementary FLL Explore Team 2 : Lego Diamonds</h1>
+  </header>
+  <div class="main-bounding-box">
+  <main>
+    <button class="back-main-btn" onclick="window.location.href='index.html'">Back to Main Page</button>
+    <h1>Challenge Resources</h1>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="http://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-rgr.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge RGR PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.
+5rem;font-size:1rem;">
+    <a href="http://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-tmg.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge TMG PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="http://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-en.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge EN PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="http://firstinspires.blob.core.windows.net/fll/challenge/2026-27/interactive-rgr/index.html" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Interactive RGR
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="http://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-updates.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Updates PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bi-nonverbal-eop.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Non-Verbal EOP PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-prepack.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Non-Verbal Prepack PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-01.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Non-Verbal Book 01 PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-02.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Non-Verbal Book 02 PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-03.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Non-Verbal Book 03 PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-04.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Non-Verbal Book 04 PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-05.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Non-Verbal Book 05 PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-06.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Non-Verbal Book 06 PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-07.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Non-Verbal Book 07 PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-08.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Non-Verbal Book 08 PDF
+      </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+    <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-09.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+        FLL Challenge Non-Verbal Book 09 PDF
+      </a>
+    </div> 
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-10.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Non-Verbal Book 10 PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-11.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Non-Verbal Book 11 PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-12.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Non-Verbal Book 12 PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-13.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Non-Verbal Book 13 PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-table-building-instructions.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Table Building Instructions PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-rubrics-color.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Rubrics Color PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-judging-session-flowchart.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Judging Session Flowchart PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-awards.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Awards PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-coach-mentor-nomination-fillable.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Coach/Mentor Nomination Fillable PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-software-scoresheet.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Software Scoresheet PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://www.youtube.com/watch?v=qPbwNQaQt4Y" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge YouTube Video
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://eventhub.firstinspires.org/login" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge EventHub Login
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-multimedia-resources.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Multimedia Resources PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-wireframe-grid.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Wireframe Grid PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-field-setup-reference-guide.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Field Setup Reference Guide PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-season-overview.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Season Overview PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-participation-rules.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Participation Rules PDF
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://eventhub.firstinspires.org/scoresheet" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge EventHub Scoresheet
+        </a>
+    </div>
+    <div style="text-align:center;color:#0052a3;margin-bottom:0.5rem;font-size:1rem;">
+        <a href="https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-multimedia-resources.pdf" target="_blank" style="color: var(--primary-color); text-decoration: underline;">
+            FLL Challenge Multimedia Resources PDF
+        </a>
+    </div>
+    <!--http://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-rgr.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-tmg.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-en.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/interactive-rgr/index.html
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-updates.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-eop.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-prepack.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-01.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-02.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-03.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-04.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-05.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-06.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-07.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-08.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-09.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-10.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-11.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-12.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-bi-nonverbal-book-13.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-table-building-instructions.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-rubrics-color.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-judging-session-flowchart.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-awards.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-coach-mentor-nomination-fillable.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-software-scoresheet.pdf
+https://www.youtube.com/watch?v=qPbwNQaQt4Y
+https://eventhub.firstinspires.org/login
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-multimedia-resources.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-wireframe-grid.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-field-setup-reference-guide.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-season-overview.pdf
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-participation-rules.pdf
+https://eventhub.firstinspires.org/scoresheet
+https://firstinspires.blob.core.windows.net/fll/challenge/2026-27/fll-challenge-bioglow-classpack-scoresheet.pdf-->
+    
+  </main>
+  </div>
+  <footer id="admin-footer" style="display:none;text-align:center;margin:0.75rem 0;color:#555;">
+    <span>Questions or issues? </span>
+    <a id="admin-mailto" href="#" style="color:#0052a3;text-decoration:underline;">Contact Admin</a>
+  </footer>
+  <style>
+    .back-main-btn {
+      display: block;
+      margin: 0 0 1rem 0;
+      padding: 0.5rem 0;
+      width: 260px;
+      background: #e7f1ff;
+      color: #0052a3;
+      border: 1px solid #b3d4fc;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      text-align: center;
+      font-weight: bold;
+      box-shadow: 0 1px 4px #0001;
+      transition: background 0.2s;
+    }
+    .back-main-btn:hover {
+      background: #d0e7ff;
+    }
+    .main-bounding-box {
+      width: 98%;
+      max-width: 1000px;
+      margin: 1rem auto;
+      background: #fff;
+      border-radius: 12px;
+      border: 2px solid #b3d4fc;
+      box-shadow: 0 2px 8px #0001;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      min-height: 400px;
+      box-sizing: border-box;
+    }
+  </style>
+  <script>
+    // Allowlist of parent emails (copy from index.html)
+    const allowUser = [
+      'samirbaid@gmail.com',
+      'dedhia.krina@gmail.com',
+      'juididolkr@gmail.com',
+      'namitachitre85@gmail.com',
+      'vikasy@gmail.com',
+      'yadavnaom@gmail.com'
+    ];
+  const ADMIN_EMAIL = 'fll2025.westvalley.cusdk8@gmail.com';
+    // Firebase config (copy from index.html)
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3nbgoGy4LKZDWV8ILDsHmTQceNg1lE2c",
+      authDomain: "fllex2wv.firebaseapp.com",
+      projectId: "fllex2wv",
+      storageBucket: "fllex2wv.firebasestorage.app",
+      messagingSenderId: "105509048133",
+      appId: "1:105509048133:web:2655ec171befe83d09b82c",
+      measurementId: "G-2YXJTCCFL8"
+    };
+    // Initialize Firebase using the global firebase object
+    firebase.initializeApp(firebaseConfig);
+    if (firebase.analytics) { firebase.analytics(); }
+    const storage = firebase.storage();
+    const db = firebase.firestore();
+    // Debug: log storage and db after initialization
+    console.log('[DEBUG] storage:', storage);
+    console.log('[DEBUG] db:', db);
+    const mediaGrid = document.getElementById('media-grid');
+    const adminFooter = document.getElementById('admin-footer');
+    const adminMailto = document.getElementById('admin-mailto');
+    if (adminMailto && ADMIN_EMAIL) {
+      adminMailto.href = 'mailto:' + ADMIN_EMAIL + '?subject=' + encodeURIComponent('FLL Explore Hub - Media Support');
+    }
+    const mediaUploadDiv = document.getElementById('media-upload');
+    const mediaFileInput = document.getElementById('media-file');
+    const mediaUploadBtn = document.getElementById('media-upload-btn');
+    const mediaUploadStatus = document.getElementById('media-upload-status');
+    const mediaEmptyMsg = document.getElementById('media-empty-msg');
+    const mediaItemTemplate = document.getElementById('media-item-template');
+    function showMediaUploadUI(isAllowed) {
+      if (isAllowed) { mediaUploadDiv.style.display = ''; }
+      else { mediaUploadDiv.style.display = 'none'; }
+    }
+    mediaUploadBtn.addEventListener('click', async () => {
+  console.log('[DEBUG] Upload button clicked');
+  const file = mediaFileInput.files[0];
+  console.log('[DEBUG] Selected file:', file);
+      if (!file) { mediaUploadStatus.textContent = 'Please select a file.'; return; }
+      const isImage = file.type.startsWith('image');
+      const isVideo = file.type.startsWith('video');
+      // Video: warn and offer to compress if over 20MB
+      if (isVideo && file.size > 20 * 1024 * 1024) {
+        console.log('[DEBUG] Video is over 20MB, attempting to load ffmpeg.wasm');
+        if (!window.ffmpegLoaded) {
+          mediaUploadStatus.textContent = 'Loading video compression tools (first time may take 30+ seconds)...';
+          // Dynamically load ffmpeg.wasm
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.min.js';
+          script.onload = () => { window.ffmpegLoaded = true; };
+          document.body.appendChild(script);
+          // Wait for window.FFmpeg to be available
+          let waited = 0;
+          while (!window.FFmpeg && waited < 20000) { // wait up to 20s
+            await new Promise(r => setTimeout(r, 200));
+            waited += 200;
+          }
+        }
+        if (!window.FFmpeg) {
+          mediaUploadStatus.textContent = 'Video compression tool failed to load. Please try again or use a smaller video.';
+          console.error('[DEBUG] FFmpeg WASM not loaded. window.FFmpeg:', window.FFmpeg);
+          // 1. Debug WASM loading
+          if (!window.FFmpeg) {
+            console.error('[DEBUG] FFmpeg WASM script not loaded or not attached to window.');
+          }
+          // 4. Debug CORS/CDN
+          const scripts = Array.from(document.getElementsByTagName('script')).map(s => s.src);
+          console.log('[DEBUG] All loaded scripts:', scripts);
+          // 5. Debug browser compatibility
+          console.log('[DEBUG] User agent:', navigator.userAgent);
+          return;
+        }
+        if (!confirm('This video is over 20MB. Compressing it in the browser may take several minutes and use a lot of memory. Continue?')) {
+          mediaUploadStatus.textContent = 'Upload cancelled.';
+          return;
+        }
+        mediaUploadStatus.textContent = 'Compressing video (this may take several minutes)...';
+        try {
+          const { createFFmpeg, fetchFile } = window.FFmpeg;
+          const ffmpeg = createFFmpeg({ log: true });
+          console.log('[DEBUG] Calling ffmpeg.load()');
+          await ffmpeg.load();
+          console.log('[DEBUG] ffmpeg loaded');
+          // 2. Debug resource limits
+          try {
+            ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
+            console.log('[DEBUG] File written to ffmpeg FS');
+          } catch (e) {
+            console.error('[DEBUG] Error writing file to ffmpeg FS (resource/memory issue?)', e);
+            throw e;
+          }
+          // Compress: scale to 720p, lower bitrate
+          try {
+            await ffmpeg.run('-i', 'input.mp4', '-vf', 'scale=1280:720', '-b:v', '1M', '-preset', 'veryfast', 'output.mp4');
+            console.log('[DEBUG] ffmpeg run completed');
+          } catch (e) {
+            console.error('[DEBUG] Error running ffmpeg (resource/memory issue?)', e);
+            throw e;
+          }
+          // 3. Debug file API
+          let data;
+          try {
+            data = ffmpeg.FS('readFile', 'output.mp4');
+            console.log('[DEBUG] Output file read from ffmpeg FS');
+          } catch (e) {
+            console.error('[DEBUG] Error reading output file from ffmpeg FS', e);
+            throw e;
+          }
+          const compressedBlob = new Blob([data.buffer], { type: 'video/mp4' });
+          if (compressedBlob.size > 20 * 1024 * 1024) {
+            mediaUploadStatus.textContent = 'Compressed video is still too large (max 20MB). Please trim or compress before uploading.';
+            return;
+          }
+          uploadFile = new File([compressedBlob], file.name.replace(/\.[^.]+$/, '.mp4'), { type: 'video/mp4' });
+        } catch (err) {
+          mediaUploadStatus.textContent = 'Video compression failed. Please try a smaller video.';
+          return;
+        }
+      }
+      let uploadFile = file;
+      // Image: resize if over 2MB or if width/height > 1600px
+      if (isImage) {
+        const needsResize = file.size > 2 * 1024 * 1024;
+        if (needsResize) {
+          try {
+            const img = new Image();
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              img.src = e.target.result;
+            };
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+            // Resize logic
+            const maxDim = 1600;
+            let { width, height } = img;
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round(height * (maxDim / width));
+                width = maxDim;
+              } else {
+                width = Math.round(width * (maxDim / height));
+                height = maxDim;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            // Compress to JPEG, quality 0.85
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            // Convert dataURL to Blob
+            const resBlob = await (await fetch(dataUrl)).blob();
+            if (resBlob.size > 2 * 1024 * 1024) {
+              mediaUploadStatus.textContent = 'Photo is still too large after resizing (max 2MB).';
+              return;
+            }
+            uploadFile = new File([resBlob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+          } catch (err) {
+            mediaUploadStatus.textContent = 'Failed to resize image.';
+            return;
+          }
+        }
+      }
+      mediaUploadStatus.textContent = 'Uploading...';
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) throw new Error('Not logged in');
+        const ext = uploadFile.name.split('.').pop();
+        const ts = Date.now();
+        const storageRef = storage.ref().child(`media/${user.uid}_${ts}.${ext}`);
+        // Debug: log file and storageRef
+        console.log('[DEBUG] File:', uploadFile);
+        console.log('[DEBUG] storageRef:', storageRef.fullPath);
+        const snapshot = await storageRef.put(uploadFile);
+        const url = await snapshot.ref.getDownloadURL();
+        const mediaDoc = {
+          url,
+          type: isVideo ? 'video' : 'image',
+          uploadedBy: user.displayName || user.email,
+          uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          comments: []
+        };
+        await db.collection('media').add(mediaDoc);
+        mediaUploadStatus.textContent = 'Upload successful!';
+        mediaFileInput.value = '';
+        loadMedia();
+      } catch (e) {
+        mediaUploadStatus.textContent = 'Upload failed: ' + e.message;
+        // Log the full error object for debugging
+        console.error('[UPLOAD ERROR]', e);
+        if (e && e.serverResponse) {
+          console.error('[UPLOAD ERROR serverResponse]', e.serverResponse);
+        }
+      }
+    });
+    async function loadMedia() {
+      mediaGrid.innerHTML = '';
+      mediaEmptyMsg.style.display = 'none';
+      const snap = await db.collection('media').orderBy('uploadedAt', 'desc').get();
+      if (snap.empty) { mediaEmptyMsg.style.display = ''; return; }
+      snap.forEach(doc => {
+        const data = doc.data();
+        const item = mediaItemTemplate.content.cloneNode(true);
+        const preview = item.querySelector('.media-preview');
+        if (data.type === 'image') {
+          const img = document.createElement('img');
+          img.src = data.url;
+          img.alt = 'Team media';
+          img.style.maxWidth = '100%';
+          img.style.maxHeight = '110px';
+          img.style.objectFit = 'contain';
+          img.style.cursor = 'zoom-in';
+          img.addEventListener('click', function(e) {
+            e.preventDefault();
+            const overlay = document.getElementById('lightbox-overlay');
+            const lightboxImg = document.getElementById('lightbox-img');
+            overlay.style.display = 'flex';
+            lightboxImg.src = data.url;
+          });
+          preview.appendChild(img);
+    // Lightbox close logic
+    document.getElementById('lightbox-close').onclick = function() {
+      document.getElementById('lightbox-overlay').style.display = 'none';
+      document.getElementById('lightbox-img').src = '';
+    };
+    document.getElementById('lightbox-overlay').onclick = function(e) {
+      if (e.target === this) {
+        this.style.display = 'none';
+        document.getElementById('lightbox-img').src = '';
+      }
+    };
+        } else if (data.type === 'video') {
+          const vid = document.createElement('video');
+          vid.src = data.url;
+          vid.controls = true;
+          vid.style.maxWidth = '100%';
+          vid.style.maxHeight = '110px';
+          vid.style.objectFit = 'contain';
+          preview.appendChild(vid);
+        }
+        const meta = item.querySelector('.media-meta');
+        meta.textContent = `By ${data.uploadedBy || 'Unknown'}${data.uploadedAt && data.uploadedAt.toDate ? ' • ' + data.uploadedAt.toDate().toLocaleString() : ''}`;
+        const commentsDiv = item.querySelector('.media-comments');
+        const comments = Array.isArray(data.comments) ? data.comments : [];
+        const commentsList = document.createElement('div');
+        commentsList.style.marginBottom = '0.5rem';
+        comments.forEach(c => {
+          const cdiv = document.createElement('div');
+          cdiv.style.marginBottom = '0.25rem';
+          cdiv.innerHTML = `<b>${c.by || 'Anon'}:</b> ${c.text}`;
+          commentsList.appendChild(cdiv);
+        });
+        commentsDiv.appendChild(commentsList);
+        if (firebase.auth().currentUser && allowUser.includes(firebase.auth().currentUser.email.toLowerCase())) {
+          const form = document.createElement('form');
+          form.style.display = 'flex';
+          form.style.gap = '0.5rem';
+          form.onsubmit = async (e) => {
+            e.preventDefault();
+            const input = form.querySelector('input');
+            const text = input.value.trim();
+            if (!text) return;
+            input.disabled = true;
+            try {
+              const user = firebase.auth().currentUser;
+              const newComment = { by: user.displayName || user.email, text, at: new Date().toISOString() };
+              await db.collection('media').doc(doc.id).update({
+                comments: firebase.firestore.FieldValue.arrayUnion(newComment)
+              });
+              loadMedia();
+            } catch (err) {
+              alert('Failed to add comment: ' + err.message);
+            } finally {
+              input.disabled = false;
+              input.value = '';
+            }
+          };
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.placeholder = 'Add a comment...';
+          input.style.flex = '1';
+          const btn = document.createElement('button');
+          btn.type = 'submit';
+          btn.textContent = 'Post';
+          btn.style.background = '#0052a3';
+          btn.style.color = '#fff';
+          btn.style.border = 'none';
+          btn.style.borderRadius = '4px';
+          btn.style.padding = '0.25rem 0.75rem';
+          form.appendChild(input);
+          form.appendChild(btn);
+          commentsDiv.appendChild(form);
+        }
+        mediaGrid.appendChild(item);
+      });
+    }
+    firebase.auth().onAuthStateChanged(user => {
+      const isAllowed = user && allowUser.includes((user.email || '').toLowerCase());
+      showMediaUploadUI(!!isAllowed);
+      if (adminFooter) adminFooter.style.display = isAllowed ? '' : 'none';
+      if (user && isAllowed) loadMedia();
+      else {
+        mediaGrid.innerHTML = '';
+        mediaEmptyMsg.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
