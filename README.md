@@ -1,6 +1,6 @@
 # FLL Explore Team Hub
 
-A lightweight Firebase-backed web portal for a FIRST LEGO League Explore team ("Lego Diamonds"). It provides a centralized place for schedule progress tracking, timeline, roster, resources, media link, and administrative guest access.
+A lightweight Firebase-backed web portal for a FIRST LEGO League Explore team ("New team coming"). It provides a centralized place for schedule progress tracking, timeline, roster, resources, media link, and administrative guest access.
 
 ## Features
 - Google Auth allowlist (Firestore `allowedUsers` collection)
