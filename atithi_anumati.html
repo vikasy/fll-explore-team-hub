@@ -75,7 +75,7 @@
   // Build meta: embedded at commit c15f1c1. Replace SECRET_HASH below with the SHA-256 of your chosen passphrase.
   // To set: open devtools console and run: copy(await (async ()=>{const enc=new TextEncoder().encode('YourPassphrase');const buf=await crypto.subtle.digest('SHA-256',enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');})())
   // Then paste hash here and redeploy.
-  const SECRET_HASH = 'b98b58aa290a625159292068d687e4c9844e334c36c1bc634a46c661af18b1d3'; // SHA-256 hash of secret phrase (colorYEARthing)
+  const SECRET_HASH = 'f4aa31a89bc5e3d94afe78c163eeda5bd14852cdad4e133eb387056ffd70c6b7'; // SHA-256 hash of secret phrase (colorYEARthing)
   let secretUnlocked = false;
   let failedAttempts = 0;
   let lockUntil = 0; // epoch ms when next attempt allowed
@@ -95,7 +95,7 @@
         btn.disabled = true;
       } else {
         if (failedAttempts > 0 && failedAttempts < MAX_ATTEMPTS) {
-          msg.textContent = 'Attempts: ' + failedAttempts + '/' + MAX_ATTEMPTS;
+          msg.textContent = 'Passphrase Changed Recently! Attempts: ' + failedAttempts + '/' + MAX_ATTEMPTS;
         }
         btn.disabled = false;
       }
